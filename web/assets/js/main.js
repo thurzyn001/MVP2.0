@@ -252,6 +252,21 @@ function configurarEventosModal() {
  * @param {'sucesso'|'erro'|'info'} tipo - Estilo do toast
  */
 function mostrarToast(mensagem, tipo = 'info') {
+    const LIMITE_TOASTS = 5;
+
+    // Se já atingiu o limite de 5 toasts na tela, fecha o mais antigo com animação suave
+    const toastsAtivos = Array.from(toastContainer.querySelectorAll('.toast:not(.saindo)'));
+    if (toastsAtivos.length >= LIMITE_TOASTS) {
+        const maisAntigo = toastsAtivos[0];
+        maisAntigo.classList.remove('mostrar');
+        maisAntigo.classList.add('saindo');
+        setTimeout(() => {
+            if (maisAntigo.parentElement) {
+                maisAntigo.parentElement.removeChild(maisAntigo);
+            }
+        }, 350);
+    }
+
     const toast = document.createElement('div');
     toast.className = `toast ${tipo}`;
 
@@ -312,8 +327,8 @@ function mostrarToast(mensagem, tipo = 'info') {
     // Fechar ao clicar no "X"
     toast.querySelector('.toast-fechar').addEventListener('click', removerToast);
 
-    // Auto-destruição após 4 segundos
-    setTimeout(removerToast, 4000);
+    // Auto-destruição após 3 segundos
+    setTimeout(removerToast, 3000);
 }
 
 /**

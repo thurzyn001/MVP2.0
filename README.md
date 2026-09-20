@@ -34,7 +34,7 @@ O repositório está logicamente dividido em duas áreas:
 │   ├── assets/            # Arquivos estáticos
 │   │   ├── css/           # Folhas de estilo (style.css)
 │   │   ├── js/            # Lógica cliente (main.js)
-│   │   └── favicon.png    # Ícone da aplicação
+│   │   └── img/           # Imagens e ícones (favicon.ico, logo.png)
 │   └── index.html         # View principal da aplicação
 │
 └── README.md              # Documentação
