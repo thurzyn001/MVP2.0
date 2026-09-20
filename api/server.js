@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middlewares
-app.use(cors({ exposedHeaders: ['Content-Disposition'] }));
+app.use(cors());
 app.use(express.json());
 
 // Rota de Teste para o Checkpoint 1
