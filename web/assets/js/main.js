@@ -4,7 +4,7 @@
 
 // ATENÇÃO: Quando a API for publicada na nuvem (ex: Render), troque 'http://localhost:3000' pela URL da nuvem.
 // Exemplo: const BASE_URL = 'https://minha-api-node.onrender.com';
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'https://mvp2-0-5szr.onrender.com';
 const API_URL = `${BASE_URL}/api/projetos`;
 
 // Elementos do DOM

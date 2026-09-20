@@ -1,19 +1,21 @@
 # Sistema Multicamadas: Gerenciador de Projetos (MVP)
 
-Um sistema multicamadas moderno construído para gerenciar projetos, demonstrando a separação de responsabilidades entre Frontend e Backend e focado nos princípios de APIs REST.
+Um sistema multicamadas moderno construído para gerenciar projetos, demonstrando a separação total de responsabilidades entre Frontend e Backend, preparado para rodar 100% na nuvem (Serverless e PaaS).
 
 ## 🛠️ Tecnologias Utilizadas
 
+**Banco de Dados (Dados):**
+- **Neon / PostgreSQL:** Banco de dados relacional serverless.
+- **Prisma ORM:** Mapeador Objeto-Relacional para comunicação e modelagem.
+
 **Backend (Cérebro da aplicação):**
-- **Node.js:** Ambiente de execução Javascript (server-side).
-- **Express.js:** Micro-framework web para criação de rotas REST.
-- **Prisma ORM:** Mapeador Objeto-Relacional para comunicação e modelagem do banco de dados.
-- **PostgreSQL:** Banco de dados relacional (também configurável para MySQL).
+- **Node.js & Express.js:** API RESTful que centraliza as regras de negócio.
+- Hospedagem recomendada: **Render.com**.
 
 **Frontend (Rosto da aplicação):**
-- **PHP:** Linguagem server-side rodando no Apache (XAMPP), responsável por gerar a UI inicial e realizar a validação de proxy através da biblioteca cURL.
-- **HTML5 & CSS3:** Estruturação semântica e interface de usuário moderna.
-- **Javascript (Vanilla):** Requisições assíncronas utilizando **Fetch API** para uma experiência *Single Page Application* (SPA) parcial.
+- **HTML5, CSS3 & Javascript (Vanilla):** Interface estática (SPA parcial).
+- **Fetch API:** Requisições assíncronas ao backend para criar, listar e deletar projetos sem recarregar a tela.
+- Hospedagem recomendada: **Vercel** ou **GitHub Pages**.
 
 ## 📁 Estrutura de Arquivos
 O repositório está logicamente dividido em duas áreas:
@@ -25,69 +27,55 @@ O repositório está logicamente dividido em duas áreas:
 │   ├── src/
 │   │   ├── controllers/   # Regras de negócios (CRUD)
 │   │   └── routes/        # Definição dos endpoints REST
-│   ├── package.json       # Configuração de dependências NPM
+│   ├── package.json       # Scripts (start/dev) e dependências
 │   └── server.js          # Entrypoint da API Node.js
 │
-├── web/                   # Aplicação Frontend (PHP, JS, CSS)
+├── web/                   # Aplicação Frontend (Estática)
 │   ├── assets/            # Arquivos estáticos
-│   │   ├── css/           # Folhas de estilo
-│   │   └── js/            # Lógica cliente (Fetch API)
-│   ├── index.php          # View principal
-│   └── ApiClient.php      # Integração do PHP usando cURL
+│   │   ├── css/           # Folhas de estilo (style.css)
+│   │   └── js/            # Lógica cliente (main.js)
+│   └── index.html         # View principal da aplicação
 │
 └── README.md              # Documentação
 ```
 
-## 🚀 Como Instalar e Rodar Localmente
+---
 
-### Pré-requisitos
-- **Node.js** instalado (v16 ou superior).
-- Servidor Web com PHP habilitado como **XAMPP** ou MAMP (apontado para a pasta `/web`).
-- Um banco de dados **PostgreSQL** ou MySQL rodando localmente ou remotamente.
+## 🚀 Como Fazer o Deploy Completo na Nuvem
 
-### 1. Configurando o Backend (API)
-Abra seu terminal e navegue até a pasta `api/`:
+Este projeto foi desenhado para plataformas gratuitas modernas. Siga os passos abaixo para colocar tudo no ar:
 
-```bash
-cd api
-```
+### Passo 1: Banco de Dados (Neon)
+1. Crie uma conta no [Neon.tech](https://neon.tech/) e inicie um novo projeto.
+2. Copie a sua **Connection String** (algo como `postgresql://neondb_owner:senha@ep-nome...aws.neon.tech/nome_db?sslmode=require`).
+3. Localmente, no seu terminal dentro da pasta `api`, crie o arquivo `.env` com a sua URL e rode:
+   ```bash
+   npx prisma db push
+   ```
+   *(Isso criará a estrutura de tabelas na nuvem).*
 
-Instale as dependências:
-```bash
-npm install
-```
+### Passo 2: Backend da API (Render.com)
+1. Suba este repositório para o seu **GitHub**.
+2. Crie uma conta no [Render](https://render.com/) e clique em **New > Web Service**.
+3. Conecte o seu repositório.
+4. **Configurações cruciais no Render:**
+   - **Root Directory:** `api`
+   - **Build Command:** `npm install && npx prisma generate`
+   - **Start Command:** `npm start`
+5. **Environment Variables (Variáveis de Ambiente):**
+   - Adicione uma variável com **Key** `DATABASE_URL` e cole a URL do seu Neon no **Value**.
+6. Clique em **Create**. Em poucos minutos, o Render fornecerá a URL da sua API (ex: `https://sua-api.onrender.com`).
 
-Crie uma cópia do arquivo `.env.example` e renomeie para `.env`. Depois, coloque as credenciais do seu banco de dados:
-```env
-PORT=3000
-DATABASE_URL="postgresql://usuario:senha@localhost:5432/nomedobanco?schema=public"
-```
+### Passo 3: Frontend (Vercel)
+1. No seu código local, abra o arquivo `web/assets/js/main.js`.
+2. Altere a variável `BASE_URL` (logo no topo) para a URL que o Render acabou de gerar para você.
+3. Faça o commit dessa alteração (`git commit`) e suba para o GitHub (`git push`).
+4. Crie uma conta na [Vercel](https://vercel.com/) e adicione um **New Project**.
+5. Importe este mesmo repositório do GitHub.
+6. Na configuração do projeto na Vercel, em **Root Directory**, altere para `web`.
+7. Clique em **Deploy**.
 
-Sincronize as tabelas do Prisma com o seu banco de dados:
-```bash
-npx prisma db push
-```
-
-Inicie o servidor de desenvolvimento:
-```bash
-npm run dev
-# O servidor rodará em http://localhost:3000
-```
-
-### 2. Configurando o Frontend (Web)
-1. Inicie o Apache no painel do XAMPP.
-2. Certifique-se de que a pasta principal do projeto está no diretório correto do Apache (ex: `htdocs`), ou crie um virtual host apontando para a pasta `web/`.
-3. Acesse via navegador `http://localhost/sua_pasta/web/`. A página inicial validará imediatamente se o backend está rodando via cURL e inicializará as requisições Fetch.
-
-## 🌍 Deploy / Hospedagem
-
-O projeto foi criado de forma a possibilitar implantação simplificada em plataformas de nuvem:
-
-- **API Node.js:** Pode ser hospedada em plataformas como **Vercel**, **Render**, ou **Railway**. Basta conectar o repositório, setar o Root Directory para `api/` e inserir a variável `DATABASE_URL`.
-- **Banco de Dados:** Pode usar serviços gerenciados gratuitos como **Supabase** (PostgreSQL) ou **Neon**.
-- **Frontend (Web):** 
-  - Se mantido com PHP (por necessidade de regras servidor), requer serviços como Hostinger ou Heroku.
-  - Se o `index.php` for renomeado para `index.html` (e o ApiClient em PHP for abandonado), o front se torna 100% estático e pode ser facilmente deployado gratuitamente pelo **GitHub Pages** ou **Vercel**, bastando alterar o endereço de `API_URL` no `main.js` para o URL de produção da API.
+🎉 **Pronto!** O seu frontend na Vercel está agora se comunicando com o seu backend no Render, salvando e excluindo dados permanentemente no banco de dados Neon. Tudo online!
 
 ---
 *Projeto desenvolvido como laboratório MVP para consolidar conhecimentos em Integração de Sistemas Multicamadas.*
