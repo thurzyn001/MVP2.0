@@ -65,55 +65,79 @@
         </header>
 
         <main>
-            <!-- Mini Dashboard de Métricas (Passo 2) -->
-            <section class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-icon icon-total">
-                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                        </svg>
+            <!-- Dashboard de Métricas e Taxa de Conclusão (Passo 2 do Ciclo) -->
+            <section class="dashboard-metricas-container">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon icon-total">
+                            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="metric-info">
+                            <span class="metric-label">Total</span>
+                            <span class="metric-value" id="metrica-total">0</span>
+                        </div>
                     </div>
-                    <div class="metric-info">
-                        <span class="metric-label">Total</span>
-                        <span class="metric-value" id="metrica-total">0</span>
+
+                    <div class="metric-card">
+                        <div class="metric-icon icon-pendente">
+                            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="metric-info">
+                            <span class="metric-label">Pendentes</span>
+                            <span class="metric-value" id="metrica-pendente">0</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon icon-andamento">
+                            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                        </div>
+                        <div class="metric-info">
+                            <span class="metric-label">Em Andamento</span>
+                            <span class="metric-value" id="metrica-andamento">0</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon icon-concluido">
+                            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </div>
+                        <div class="metric-info">
+                            <span class="metric-label">Concluídos</span>
+                            <span class="metric-value" id="metrica-concluido">0</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="metric-card">
-                    <div class="metric-icon icon-pendente">
-                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
+                <!-- Barra de Progresso Geral de Conclusão (Passo 2 do Ciclo) -->
+                <div class="progresso-geral-card">
+                    <div class="progresso-header">
+                        <div class="progresso-info-wrapper">
+                            <div class="progresso-label-wrapper">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="progresso-icon">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                <span class="progresso-titulo">Taxa de Conclusão Geral</span>
+                            </div>
+                            <span class="progresso-subtitulo" id="progresso-subtitulo">0 de 0 projetos concluídos</span>
+                        </div>
+                        <div class="progresso-porcentagem-wrapper">
+                            <span class="progresso-porcentagem" id="progresso-porcentagem">0%</span>
+                        </div>
                     </div>
-                    <div class="metric-info">
-                        <span class="metric-label">Pendentes</span>
-                        <span class="metric-value" id="metrica-pendente">0</span>
-                    </div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-icon icon-andamento">
-                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                        </svg>
-                    </div>
-                    <div class="metric-info">
-                        <span class="metric-label">Em Andamento</span>
-                        <span class="metric-value" id="metrica-andamento">0</span>
-                    </div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-icon icon-concluido">
-                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg>
-                    </div>
-                    <div class="metric-info">
-                        <span class="metric-label">Concluídos</span>
-                        <span class="metric-value" id="metrica-concluido">0</span>
+                    <div class="progresso-trilha" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progresso-barra-aria" aria-label="Taxa de conclusão dos projetos">
+                        <div class="progresso-preenchimento" id="progresso-preenchimento" style="width: 0%;"></div>
                     </div>
                 </div>
             </section>

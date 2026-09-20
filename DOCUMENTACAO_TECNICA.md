@@ -85,9 +85,10 @@ A API expõe endpoints estruturados conforme os padrões REST, utilizando códig
 * **Compatibilidade Desktop e Mobile:** Alça de arrasto dedicada (`.drag-handle`) com suporte a HTML5 Drag API no mouse e Touch Gestures nativos com `touch-action: none;` no celular.
 * **Persistência Local:** Ordem personalizada persistida no `localStorage`, restaurada no reload e sincronizada com as exportações em CSV/JSON.
 
-### 3. Mini Dashboard de Métricas em Tempo Real
-* Cards superiores calculam em memória o total de projetos e a contagem por cada status.
-* **Microinteração:** Função de animação com interpolação cúbica (*cubic easing*) via `requestAnimationFrame` para atualização visual fluida dos números.
+### 3. Mini Dashboard de Métricas e Taxa de Conclusão Dinâmica
+* **Contadores com Easing Suave:** Cards superiores calculam em memória o total de projetos e a contagem por cada status, com interpolação cúbica (*cubic easing*) via `requestAnimationFrame` para atualização visual fluida dos números.
+* **Barra de Progresso Horizontal:** Exibe a taxa percentual de tarefas concluídas em relação ao total, com barra em degradê moderno (`#3b82f6` a `#10b981`), transição de largura suave e texto descritivo contextual (incluindo estado comemorativo de 100% de conclusão).
+* **Acessibilidade:** Implementado com padrão WAI-ARIA (`role="progressbar"`, `aria-valuenow`, `aria-valuemin="0"`, `aria-valuemax="100"`).
 
 ### 4. Mecanismo de Busca e Filtros Vivos
 * Busca instantânea por correspondência case-insensitive em tempo real nos campos de título e descrição.

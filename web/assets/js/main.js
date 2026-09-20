@@ -707,6 +707,90 @@ function atualizarMetricas(projetos = []) {
     animarContador('metrica-pendente', pendentes);
     animarContador('metrica-andamento', andamento);
     animarContador('metrica-concluido', concluidos);
+
+    // Atualiza Barra de Progresso Geral e Taxa de Conclusão (Passo 2 do Ciclo)
+    atualizarProgressoGeral(total, concluidos);
+}
+
+/**
+ * Atualiza a barra de progresso horizontal e a porcentagem de conclusão
+ * @param {number} total - Total de projetos
+ * @param {number} concluidos - Quantidade de projetos concluídos
+ */
+function atualizarProgressoGeral(total, concluidos) {
+    const elSubtitulo = document.getElementById('progresso-subtitulo');
+    const elPreenchimento = document.getElementById('progresso-preenchimento');
+    const elPorcentagem = document.getElementById('progresso-porcentagem');
+    const elAria = document.getElementById('progresso-barra-aria');
+    const cardProgresso = document.querySelector('.progresso-geral-card');
+
+    if (!elPreenchimento || !elPorcentagem) return;
+
+    let porcentagem = 0;
+    if (total > 0) {
+        porcentagem = Math.round((concluidos / total) * 100);
+    }
+
+    // Atualiza preenchimento visual e atributos de acessibilidade
+    elPreenchimento.style.width = `${porcentagem}%`;
+    if (elAria) elAria.setAttribute('aria-valuenow', porcentagem);
+
+    // Anima a porcentagem numérica
+    animarPorcentagem('progresso-porcentagem', porcentagem);
+
+    // Texto descritivo
+    if (elSubtitulo) {
+        if (total === 0) {
+            elSubtitulo.textContent = 'Nenhum projeto cadastrado no momento.';
+        } else if (concluidos === total) {
+            elSubtitulo.textContent = `🎉 Todos os ${total} projetos concluídos! Parabéns!`;
+        } else {
+            elSubtitulo.textContent = `${concluidos} de ${total} ${total === 1 ? 'projeto concluído' : 'projetos concluídos'}`;
+        }
+    }
+
+    // Classe comemorativa quando 100% completo
+    if (cardProgresso) {
+        cardProgresso.classList.toggle('completo', total > 0 && concluidos === total);
+    }
+}
+
+/**
+ * Anima a transição da porcentagem numérica com sufixo %
+ * @param {string} id - ID do elemento DOM
+ * @param {number} valorFinal - Porcentagem alvo (0 a 100)
+ * @param {number} duracao - Duração em ms
+ */
+function animarPorcentagem(id, valorFinal, duracao = 450) {
+    const elemento = document.getElementById(id);
+    if (!elemento) return;
+
+    const valorInicial = parseInt(elemento.textContent, 10) || 0;
+    if (valorInicial === valorFinal) {
+        elemento.textContent = `${valorFinal}%`;
+        return;
+    }
+
+    if (elemento._animFrame) {
+        cancelAnimationFrame(elemento._animFrame);
+    }
+
+    const tempoInicio = performance.now();
+
+    function atualizar(agora) {
+        const tempoDecorrido = agora - tempoInicio;
+        const progresso = Math.min(tempoDecorrido / duracao, 1);
+        const easeOut = 1 - Math.pow(1 - progresso, 3);
+        const valorAtual = Math.round(valorInicial + (valorFinal - valorInicial) * easeOut);
+
+        elemento.textContent = `${valorAtual}%`;
+
+        if (progresso < 1) {
+            elemento._animFrame = requestAnimationFrame(atualizar);
+        }
+    }
+
+    elemento._animFrame = requestAnimationFrame(atualizar);
 }
 
 /**
