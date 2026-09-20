@@ -19,15 +19,21 @@ const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const themeLabel = document.getElementById('theme-label');
 const textareaDescricao = document.getElementById('descricao');
 const contadorCaracteres = document.getElementById('contador-caracteres');
+const inputBusca = document.getElementById('input-busca');
+const btnLimparBusca = document.getElementById('btn-limpar-busca');
+const infoQtdProjetos = document.getElementById('info-quantidade-projetos');
 
 // Variáveis para controle de estado
 let projetoIdParaExcluir = null;
 let todosOsProjetos = [];
+let termoBusca = '';
+let statusFiltro = 'todos';
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     inicializarTema();
     configurarTextareaDescricao();
+    configurarFiltrosEBusca();
     verificarStatusApi();
     carregarProjetos();
     configurarEventosModal();
@@ -96,7 +102,8 @@ async function carregarProjetos() {
         const projetos = await response.json();
         todosOsProjetos = Array.isArray(projetos) ? projetos : [];
         atualizarMetricas(todosOsProjetos);
-        renderizarProjetos(todosOsProjetos);
+        atualizarContadoresFiltros(todosOsProjetos);
+        aplicarFiltros();
     } catch (error) {
         listaProjetos.innerHTML = `
             <div class="empty-state" style="color: red;">
@@ -107,11 +114,172 @@ async function carregarProjetos() {
 }
 
 /**
+ * Filtra os projetos em memória de acordo com o status e o termo de busca
+ */
+function aplicarFiltros() {
+    const termo = (termoBusca || '').trim().toLowerCase();
+
+    const filtrados = todosOsProjetos.filter(projeto => {
+        const matchStatus = (statusFiltro === 'todos') || (projeto.status === statusFiltro);
+        
+        const nome = (projeto.nome || '').toLowerCase();
+        const desc = (projeto.descricao || '').toLowerCase();
+        const matchBusca = !termo || nome.includes(termo) || desc.includes(termo);
+
+        return matchStatus && matchBusca;
+    });
+
+    atualizarContadorHeader(filtrados.length, todosOsProjetos.length);
+    renderizarProjetos(filtrados);
+}
+
+/**
+ * Atualiza o indicador numérico no topo da seção de projetos
+ */
+function atualizarContadorHeader(qtdExibida, total) {
+    if (!infoQtdProjetos) return;
+
+    if (total === 0) {
+        infoQtdProjetos.textContent = '0 projetos';
+    } else if (qtdExibida === total) {
+        infoQtdProjetos.textContent = `${total} ${total === 1 ? 'projeto' : 'projetos'}`;
+    } else {
+        infoQtdProjetos.textContent = `${qtdExibida} de ${total} ${total === 1 ? 'projeto' : 'projetos'}`;
+    }
+}
+
+/**
+ * Atualiza os números nos botões/pills de filtro
+ */
+function atualizarContadoresFiltros(projetos = []) {
+    const total = projetos.length;
+    let pendentes = 0;
+    let andamento = 0;
+    let concluidos = 0;
+
+    projetos.forEach(p => {
+        if (p.status === 'Em Andamento') andamento++;
+        else if (p.status === 'Concluído') concluidos++;
+        else pendentes++;
+    });
+
+    const elTodos = document.getElementById('filtro-count-todos');
+    const elPendente = document.getElementById('filtro-count-pendente');
+    const elAndamento = document.getElementById('filtro-count-andamento');
+    const elConcluido = document.getElementById('filtro-count-concluido');
+
+    if (elTodos) elTodos.textContent = total;
+    if (elPendente) elPendente.textContent = pendentes;
+    if (elAndamento) elAndamento.textContent = andamento;
+    if (elConcluido) elConcluido.textContent = concluidos;
+}
+
+/**
+ * Configura os event listeners da barra de busca e dos botões de filtro
+ */
+function configurarFiltrosEBusca() {
+    if (inputBusca) {
+        inputBusca.addEventListener('input', (e) => {
+            termoBusca = e.target.value;
+            if (btnLimparBusca) {
+                if (termoBusca.length > 0) {
+                    btnLimparBusca.classList.remove('oculta');
+                } else {
+                    btnLimparBusca.classList.add('oculta');
+                }
+            }
+            aplicarFiltros();
+        });
+
+        inputBusca.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                limparBusca();
+            }
+        });
+    }
+
+    if (btnLimparBusca) {
+        btnLimparBusca.addEventListener('click', limparBusca);
+    }
+
+    const botoesFiltro = document.querySelectorAll('.btn-filtro');
+    botoesFiltro.forEach(botao => {
+        botao.addEventListener('click', () => {
+            botoesFiltro.forEach(b => b.classList.remove('active'));
+            botao.classList.add('active');
+            statusFiltro = botao.dataset.status || 'todos';
+            aplicarFiltros();
+        });
+    });
+}
+
+/**
+ * Limpa apenas o campo de busca
+ */
+function limparBusca() {
+    termoBusca = '';
+    if (inputBusca) {
+        inputBusca.value = '';
+        inputBusca.focus();
+    }
+    if (btnLimparBusca) {
+        btnLimparBusca.classList.add('oculta');
+    }
+    aplicarFiltros();
+}
+
+/**
+ * Reseta busca e filtros para o estado inicial
+ */
+function limparFiltros() {
+    termoBusca = '';
+    statusFiltro = 'todos';
+
+    if (inputBusca) inputBusca.value = '';
+    if (btnLimparBusca) btnLimparBusca.classList.add('oculta');
+
+    const botoesFiltro = document.querySelectorAll('.btn-filtro');
+    botoesFiltro.forEach(btn => {
+        btn.classList.toggle('active', (btn.dataset.status || '') === 'todos');
+    });
+
+    aplicarFiltros();
+}
+
+/**
+ * Destaca com segurança contra XSS as palavras pesquisadas
+ */
+function destacarTermo(texto, termo) {
+    if (!texto) return '';
+    const textoSeguro = escaparHTML(texto);
+    if (!termo || !termo.trim()) return textoSeguro;
+
+    const termoSeguro = escaparHTML(termo.trim());
+    const regex = new RegExp(`(${termoSeguro.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return textoSeguro.replace(regex, '<mark class="highlight">$1</mark>');
+}
+
+/**
  * Renderiza o HTML da lista
  */
 function renderizarProjetos(projetos) {
-    if (projetos.length === 0) {
+    if (todosOsProjetos.length === 0) {
         listaProjetos.innerHTML = '<div class="empty-state">Nenhum projeto cadastrado ainda.</div>';
+        return;
+    }
+
+    if (projetos.length === 0) {
+        listaProjetos.innerHTML = `
+            <div class="empty-state empty-search">
+                <svg viewBox="0 0 24 24" width="38" height="38" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" class="empty-icon">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <h3>Nenhum projeto encontrado</h3>
+                <p>Não encontramos nenhum projeto com os filtros e termo de busca aplicados.</p>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="limparFiltros()">Limpar Filtros</button>
+            </div>
+        `;
         return;
     }
 
@@ -139,8 +307,8 @@ function renderizarProjetos(projetos) {
         div.className = 'projeto-item';
         div.innerHTML = `
             <div class="projeto-info">
-                <h3>${escaparHTML(projeto.nome)}</h3>
-                <p>${escaparHTML(projeto.descricao || 'Nenhuma descrição fornecida.')}</p>
+                <h3>${destacarTermo(projeto.nome, termoBusca)}</h3>
+                <p>${destacarTermo(projeto.descricao || 'Nenhuma descrição fornecida.', termoBusca)}</p>
                 <div class="projeto-rodape">
                     <button type="button" 
                             class="badge badge-btn ${badgeClasse}" 
