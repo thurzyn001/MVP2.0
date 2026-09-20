@@ -37,9 +37,15 @@ O repositório está logicamente dividido em duas áreas:
 │   │   └── img/           # Imagens e ícones (favicon.ico, logo.png)
 │   └── index.html         # View principal da aplicação
 │
-├── README.md              # Documentação
+├── README.md              # Documentação principal
+├── DOCUMENTACAO_TECNICA.md # Especificações de arquitetura e API
 └── TODO.md                # Backlog e roadmap técnico
 ```
+
+---
+
+## 📘 Documentação de Arquitetura & API
+Para uma visão aprofundada da topologia multicamadas, tabela completa de endpoints REST, regras de segurança e detalhes de engenharia, consulte o arquivo **[DOCUMENTACAO_TECNICA.md](DOCUMENTACAO_TECNICA.md)**.
 
 ---
 
