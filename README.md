@@ -1,4 +1,4 @@
-# Sistema Multicamadas: Gerenciador de Projetos (MVP)
+# Sistema Multicamadas: Gerenciador de Projetos
 
 Um sistema multicamadas moderno construído para gerenciar projetos, demonstrando a separação total de responsabilidades entre Frontend e Backend, preparado para rodar 100% na nuvem (Serverless e PaaS).
 
@@ -33,7 +33,8 @@ O repositório está logicamente dividido em duas áreas:
 ├── web/                   # Aplicação Frontend (Estática)
 │   ├── assets/            # Arquivos estáticos
 │   │   ├── css/           # Folhas de estilo (style.css)
-│   │   └── js/            # Lógica cliente (main.js)
+│   │   ├── js/            # Lógica cliente (main.js)
+│   │   └── favicon.png    # Ícone da aplicação
 │   └── index.html         # View principal da aplicação
 │
 └── README.md              # Documentação
@@ -58,17 +59,28 @@ Este projeto foi desenhado para plataformas gratuitas modernas. Siga os passos a
 1. Suba este repositório para o seu **GitHub**.
 2. Crie uma conta no [Render](https://render.com/) e clique em **New > Web Service**.
 3. Conecte o seu repositório.
-4. **Configurações cruciais no Render:**
-   - **Root Directory:** `api`
-   - **Build Command:** `npm install && npx prisma generate`
-   - **Start Command:** `npm start`
+4. **Configurações essenciais no Render:**
+   - **Root Directory:** Digite `api` *(indica que o servidor Node está nessa pasta)*.
+   - **Build Command:** Substitua qualquer sugestão padrão (como `yarn`) por:
+     ```bash
+     npm install && npx prisma generate
+     ```
+     *(Garante a instalação dos pacotes e a geração do cliente Prisma em produção)*.
+   - **Start Command:** Substitua qualquer sugestão padrão (como `yarn start`) por:
+     ```bash
+     npm start
+     ```
+     *(Inicia o servidor executando o script configurado no `package.json`)*.
 5. **Environment Variables (Variáveis de Ambiente):**
    - Adicione uma variável com **Key** `DATABASE_URL` e cole a URL do seu Neon no **Value**.
-6. Clique em **Create**. Em poucos minutos, o Render fornecerá a URL da sua API (ex: `https://sua-api.onrender.com`).
+6. Clique em **Create Web Service**. Em poucos minutos, o Render fornecerá a URL da sua API (ex: `https://sua-api.onrender.com`).
 
 ### Passo 3: Frontend (Vercel)
 1. No seu código local, abra o arquivo `web/assets/js/main.js`.
-2. Altere a variável `BASE_URL` (logo no topo) para a URL que o Render acabou de gerar para você.
+2. Altere a variável `BASE_URL` (logo no topo) para a URL que o Render acabou de gerar para você:
+   ```javascript
+   const BASE_URL = 'https://sua-api.onrender.com';
+   ```
 3. Faça o commit dessa alteração (`git commit`) e suba para o GitHub (`git push`).
 4. Crie uma conta na [Vercel](https://vercel.com/) e adicione um **New Project**.
 5. Importe este mesmo repositório do GitHub.
@@ -78,4 +90,4 @@ Este projeto foi desenhado para plataformas gratuitas modernas. Siga os passos a
 🎉 **Pronto!** O seu frontend na Vercel está agora se comunicando com o seu backend no Render, salvando e excluindo dados permanentemente no banco de dados Neon. Tudo online!
 
 ---
-*Projeto desenvolvido como laboratório MVP para consolidar conhecimentos em Integração de Sistemas Multicamadas.*
+*Trabalho desenvolvido para a disciplina de Laboratório de Programação I como forma de demonstração prática dos conhecimentos adquiridos e obtenção de nota avaliativa.*
