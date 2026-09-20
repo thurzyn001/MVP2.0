@@ -22,6 +22,10 @@ exports.criar = async (req, res) => {
         return res.status(400).json({ erro: "Atenção: O nome do projeto é obrigatório." });
     }
 
+    if (nome.trim().length > 100) {
+        return res.status(400).json({ erro: "Atenção: O nome do projeto não pode ultrapassar 100 caracteres." });
+    }
+
     if (descricao && descricao.trim().length > 500) {
         return res.status(400).json({ erro: "Atenção: A descrição não pode ultrapassar 500 caracteres." });
     }
@@ -86,6 +90,10 @@ exports.atualizar = async (req, res) => {
 
     if (!nome || nome.trim() === '') {
         return res.status(400).json({ erro: "Atenção: O nome do projeto é obrigatório." });
+    }
+
+    if (nome.trim().length > 100) {
+        return res.status(400).json({ erro: "Atenção: O nome do projeto não pode ultrapassar 100 caracteres." });
     }
 
     if (descricao && descricao.trim().length > 500) {

@@ -77,7 +77,7 @@ A API expõe endpoints estruturados conforme os padrões REST, utilizando códig
 ## ✨ 4. Funcionalidades e Diferenciais de Engenharia
 
 ### 1. CRUD 100% Completo (Create, Read, Update, Delete)
-* **Edição Cadastral Completa (`PUT`):** Modal interativo com formulário pré-preenchido que permite alterar título e descrição de projetos já cadastrados, contando com validação de campos obrigatórios e limite de 500 caracteres.
+* **Edição Cadastral Completa (`PUT`):** Modal interativo com formulário pré-preenchido que permite alterar título e descrição de projetos já cadastrados, contando com validação de campos obrigatórios e limites estipulados (100 caracteres para o nome e 500 para a descrição).
 * **Transição Ágil de Status (`PATCH`):** Ciclo contínuo `Pendente` ➔ `Em Andamento` ➔ `Concluído` ➔ `Pendente`. O uso de `PATCH` garante alteração pontual no banco de dados sem overhead de rede.
 
 ### 2. Reordenação Interativa com Drag-and-Drop (Arrastar e Soltar)
@@ -105,13 +105,13 @@ A API expõe endpoints estruturados conforme os padrões REST, utilizando códig
 * **Tema Escuro / Claro (Dark Mode):** Alternador estilizado com persistência em `localStorage` e script anti-flash no cabeçalho do documento para evitar oscilações visuais de carregamento.
 * **Sistema de Notificações Toast:** Toasts flutuantes com auto-fechamento e limite adaptativo de exibição (máximo de 2 no mobile para evitar obstrução visual e até 5 no desktop).
 * **Modais Assíncronos Glassmorphic:** Modais modernos para exclusão e edição com suporte a acessibilidade via teclado (`Escape` para fechar e clique no backdrop).
-* **Textarea Inteligente:** Auto-expansão vertical proporcional até 180px com barra de rolagem suave e contador de limite máximo de 500 caracteres com alertas de cores.
+* **Campos com Contadores Inteligentes:** Contador visual dinâmico com limite de 100 caracteres no título e 500 caracteres na descrição (com auto-expansão vertical de até 180px), dotados de feedback visual colorido por proximidade (alerta amarelo aos 85% e limite vermelho aos 100%).
 
 ---
 
 ## 🔒 5. Segurança e Validações
 
-1. **Validação de Entrada:** O Backend valida obrigatoriedade de campos obrigatórios e rejeita entradas que ultrapassem o limite estipulado de caracteres.
+1. **Validação e Defesa em Profundidade (Defense-in-Depth):** O Backend valida a obrigatoriedade e integridade de tipos, rejeitando payloads com títulos superiores a 100 caracteres ou descrições superiores a 500 caracteres (`400 Bad Request`), operando em consonância com o atributo `maxlength` e contadores no Frontend.
 2. **Prevenção de Injeção de SQL:** Toda comunicação com o PostgreSQL é mediada pelo Prisma Client, utilizando consultas parametrizadas internamente.
 3. **Higienização de Saída (Anti-XSS):** Todo texto renderizado dinamicamente no DOM é sanitizado por meio de codificação de entidades HTML antes da inserção na árvore de elementos.
 

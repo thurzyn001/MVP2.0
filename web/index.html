@@ -148,8 +148,11 @@
                 
                 <form id="form-projeto">
                     <div class="form-group">
-                        <label for="nome">Nome do Projeto <span class="required">*</span></label>
-                        <input type="text" id="nome" name="nome" placeholder="Ex: E-commerce de Sapatos" autocomplete="off">
+                        <div class="label-with-counter">
+                            <label for="nome">Nome do Projeto <span class="required">*</span></label>
+                            <span id="contador-caracteres-nome" class="char-counter">0 / 100</span>
+                        </div>
+                        <input type="text" id="nome" name="nome" maxlength="100" placeholder="Ex: E-commerce de Sapatos" autocomplete="off">
                     </div>
                     
                     <div class="form-group">
@@ -295,7 +298,10 @@
             <form id="form-edicao">
                 <input type="hidden" id="edita-projeto-id">
                 <div class="form-group">
-                    <label for="edita-nome">Nome do Projeto <span class="required">*</span></label>
+                    <div class="label-with-counter">
+                        <label for="edita-nome">Nome do Projeto <span class="required">*</span></label>
+                        <span id="edita-char-counter-nome" class="char-counter">0 / 100</span>
+                    </div>
                     <input type="text" id="edita-nome" required maxlength="100" autocomplete="off" placeholder="Ex: App de Gestão">
                 </div>
                 <div class="form-group">

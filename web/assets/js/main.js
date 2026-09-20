@@ -17,6 +17,8 @@ const btnCancelarModal = document.getElementById('btn-cancelar-modal');
 const btnConfirmarModal = document.getElementById('btn-confirmar-modal');
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const themeLabel = document.getElementById('theme-label');
+const inputNome = document.getElementById('nome');
+const contadorNome = document.getElementById('contador-caracteres-nome');
 const textareaDescricao = document.getElementById('descricao');
 const contadorCaracteres = document.getElementById('contador-caracteres');
 const inputBusca = document.getElementById('input-busca');
@@ -31,6 +33,7 @@ const modalEdicao = document.getElementById('modal-edicao');
 const formEdicao = document.getElementById('form-edicao');
 const inputEditaId = document.getElementById('edita-projeto-id');
 const inputEditaNome = document.getElementById('edita-nome');
+const contadorEditaNome = document.getElementById('edita-char-counter-nome');
 const textareaEditaDescricao = document.getElementById('edita-descricao');
 const contadorEditaCaracteres = document.getElementById('edita-char-counter');
 const btnCancelarEdicao = document.getElementById('btn-cancelar-edicao');
@@ -47,6 +50,7 @@ let tipoOrdenacao = localStorage.getItem('projetos_tipo_ordenacao') || (localSto
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     inicializarTema();
+    configurarContadorNome();
     configurarTextareaDescricao();
     configurarFiltrosEBusca();
     configurarOrdenacao();
@@ -100,6 +104,7 @@ formProjeto.addEventListener('submit', async (e) => {
 
         mostrarToast('Projeto cadastrado com sucesso!', 'sucesso');
         formProjeto.reset(); 
+        resetarInputNome();
         resetarTextareaDescricao();
         carregarProjetos();
 
@@ -998,7 +1003,14 @@ function abrirModalEdicao(id) {
     if (!projeto || !modalEdicao) return;
 
     if (inputEditaId) inputEditaId.value = projeto.id;
-    if (inputEditaNome) inputEditaNome.value = projeto.nome || '';
+    if (inputEditaNome) {
+        inputEditaNome.value = projeto.nome || '';
+        const lenNome = inputEditaNome.value.length;
+        if (contadorEditaNome) {
+            contadorEditaNome.textContent = `${lenNome} / 100`;
+            contadorEditaNome.className = lenNome >= 100 ? 'char-counter limite-atingido' : (lenNome >= 85 ? 'char-counter limite-alerta' : 'char-counter');
+        }
+    }
     if (textareaEditaDescricao) {
         textareaEditaDescricao.value = projeto.descricao || '';
         const len = textareaEditaDescricao.value.length;
@@ -1024,6 +1036,14 @@ function fecharModalEdicao() {
     if (!modalEdicao) return;
     modalEdicao.classList.add('oculta');
     if (formEdicao) formEdicao.reset();
+    if (contadorEditaNome) {
+        contadorEditaNome.textContent = '0 / 100';
+        contadorEditaNome.className = 'char-counter';
+    }
+    if (contadorEditaCaracteres) {
+        contadorEditaCaracteres.textContent = '0 / 500';
+        contadorEditaCaracteres.className = 'char-counter';
+    }
 }
 
 /**
@@ -1055,6 +1075,23 @@ function configurarModalEdicao() {
             fecharModalEdicao();
         }
     });
+
+    // Contador de caracteres dinâmico do nome de edição
+    if (inputEditaNome && contadorEditaNome) {
+        inputEditaNome.addEventListener('input', () => {
+            const total = inputEditaNome.value.length;
+            const max = 100;
+            contadorEditaNome.textContent = `${total} / ${max}`;
+
+            if (total >= max) {
+                contadorEditaNome.className = 'char-counter limite-atingido';
+            } else if (total >= max * 0.85) {
+                contadorEditaNome.className = 'char-counter limite-alerta';
+            } else {
+                contadorEditaNome.className = 'char-counter';
+            }
+        });
+    }
 
     // Contador de caracteres dinâmico do textarea de edição
     if (textareaEditaDescricao && contadorEditaCaracteres) {
@@ -1293,5 +1330,36 @@ function resetarTextareaDescricao() {
     contadorCaracteres.textContent = '0 / 500';
     contadorCaracteres.className = 'char-counter';
 }
+
+/**
+ * Contador em tempo real para o campo de nome do projeto (limite: 100 caracteres)
+ */
+function configurarContadorNome() {
+    if (!inputNome || !contadorNome) return;
+
+    inputNome.addEventListener('input', () => {
+        const total = inputNome.value.length;
+        const max = 100;
+        contadorNome.textContent = `${total} / ${max}`;
+
+        if (total >= max) {
+            contadorNome.className = 'char-counter limite-atingido';
+        } else if (total >= max * 0.85) {
+            contadorNome.className = 'char-counter limite-alerta';
+        } else {
+            contadorNome.className = 'char-counter';
+        }
+    });
+}
+
+/**
+ * Reseta o contador de caracteres do nome para o estado inicial
+ */
+function resetarInputNome() {
+    if (!contadorNome) return;
+    contadorNome.textContent = '0 / 100';
+    contadorNome.className = 'char-counter';
+}
+
 
 
