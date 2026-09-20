@@ -525,6 +525,7 @@ textarea::-webkit-scrollbar-thumb:hover {
 }
 
 .btn-export {
+    text-decoration: none;
     background-color: var(--item-bg);
     border: 1px solid var(--border-color);
     color: var(--text-muted);

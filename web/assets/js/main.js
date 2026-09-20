@@ -135,6 +135,7 @@ function aplicarFiltros() {
 
     projetosFiltradosAtuais = filtrados;
     atualizarContadorHeader(filtrados.length, todosOsProjetos.length);
+    atualizarLinksExportacao(filtrados);
     renderizarProjetos(filtrados);
 }
 
@@ -252,30 +253,23 @@ function limparFiltros() {
 }
 
 /**
- * Configura os listeners dos botões de exportação (CSV e JSON)
+ * Atualiza os links nativos <a> de exportação de acordo com os projetos filtrados atuais.
+ * O uso de links nativos <a> com o atributo download garante funcionamento 100% contínuo
+ * em dispositivos móveis (Android Chrome e Safari iOS) sem sofrer com bloqueio de downloads automáticos.
  */
-function configurarExportacao() {
-    if (btnExportCsv) {
-        btnExportCsv.addEventListener('click', exportarCSV);
-    }
-    if (btnExportJson) {
-        btnExportJson.addEventListener('click', exportarJSON);
-    }
-}
+function atualizarLinksExportacao(lista = []) {
+    if (!btnExportCsv || !btnExportJson) return;
 
-/**
- * Exporta os projetos para formato CSV compatível com Excel e Google Sheets
- */
-function exportarCSV() {
-    const lista = projetosFiltradosAtuais;
     if (!lista || lista.length === 0) {
-        mostrarToast('Nenhum projeto disponível para exportar.', 'info');
+        btnExportCsv.removeAttribute('href');
+        btnExportCsv.removeAttribute('download');
+        btnExportJson.removeAttribute('href');
+        btnExportJson.removeAttribute('download');
         return;
     }
 
-    // Cabeçalho das colunas (Padrão Excel PT-BR com ponto e vírgula)
+    // 1. Gera Blob do CSV (Padrão Excel PT-BR com ponto e vírgula e UTF-8 BOM)
     const cabecalhos = ['ID', 'Nome do Projeto', 'Descrição', 'Status', 'Data de Criação'];
-
     const linhas = lista.map(p => {
         const id = p.id;
         const nome = `"${(p.nome || '').replace(/"/g, '""')}"`;
@@ -286,23 +280,17 @@ function exportarCSV() {
         return [id, nome, descricao, status, dataFormatada].join(';');
     });
 
-    // UTF-8 BOM (\uFEFF) garante que caracteres acentuados abram perfeitamente no Excel
     const conteudoCsv = '\uFEFF' + [cabecalhos.join(';'), ...linhas].join('\r\n');
-    
-    baixarArquivo(conteudoCsv, `projetos_${obterTimestampArquivo()}.csv`, 'text/csv;charset=utf-8;');
-    mostrarToast(`${lista.length} projeto(s) exportado(s) em CSV com sucesso!`, 'sucesso');
-}
+    const blobCsv = new Blob([conteudoCsv], { type: 'text/csv;charset=utf-8;' });
 
-/**
- * Exporta os projetos para formato JSON estruturado
- */
-function exportarJSON() {
-    const lista = projetosFiltradosAtuais;
-    if (!lista || lista.length === 0) {
-        mostrarToast('Nenhum projeto disponível para exportar.', 'info');
-        return;
+    if (btnExportCsv._blobUrl) {
+        URL.revokeObjectURL(btnExportCsv._blobUrl);
     }
+    btnExportCsv._blobUrl = URL.createObjectURL(blobCsv);
+    btnExportCsv.href = btnExportCsv._blobUrl;
+    btnExportCsv.download = `projetos_${obterTimestampArquivo()}.csv`;
 
+    // 2. Gera Blob do JSON
     const dadosExportar = lista.map(p => ({
         id: p.id,
         nome: p.nome,
@@ -313,40 +301,45 @@ function exportarJSON() {
     }));
 
     const conteudoJson = JSON.stringify(dadosExportar, null, 2);
-    baixarArquivo(conteudoJson, `projetos_${obterTimestampArquivo()}.json`, 'application/json;charset=utf-8;');
-    mostrarToast(`${lista.length} projeto(s) exportado(s) em JSON com sucesso!`, 'sucesso');
+    const blobJson = new Blob([conteudoJson], { type: 'application/json;charset=utf-8;' });
+
+    if (btnExportJson._blobUrl) {
+        URL.revokeObjectURL(btnExportJson._blobUrl);
+    }
+    btnExportJson._blobUrl = URL.createObjectURL(blobJson);
+    btnExportJson.href = btnExportJson._blobUrl;
+    btnExportJson.download = `projetos_${obterTimestampArquivo()}.json`;
 }
 
 /**
- * Dispara o download de um arquivo no navegador com suporte a múltiplos downloads móveis
+ * Configura os listeners dos links nativos de exportação (CSV e JSON)
  */
-function baixarArquivo(conteudo, nomeArquivo, tipoMime) {
-    const blob = new Blob([conteudo], { type: tipoMime });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    
-    link.href = url;
-    link.download = nomeArquivo;
-    link.style.display = 'none';
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    
-    document.body.appendChild(link);
-    link.click();
-
-    // Em celulares (Chrome Android e Safari iOS), se revogar a URL imediatamente,
-    // o gerenciador de downloads não consegue salvar o arquivo e cancela os próximos.
-    // Damos um intervalo seguro de 2.5s antes de revogar a URL temporária.
-    setTimeout(() => {
-        try {
-            if (link.parentNode) {
-                link.parentNode.removeChild(link);
+function configurarExportacao() {
+    if (btnExportCsv) {
+        btnExportCsv.addEventListener('click', (e) => {
+            if (!btnExportCsv.hasAttribute('href') || !btnExportCsv.getAttribute('href')) {
+                e.preventDefault();
+                mostrarToast('Nenhum projeto disponível para exportar.', 'info');
+                return;
             }
-            URL.revokeObjectURL(url);
-        } catch (e) {
-            // Ignora se já estiver liberado
-        }
-    }, 2500);
+            // Atualiza timestamp para o arquivo baixado
+            btnExportCsv.download = `projetos_${obterTimestampArquivo()}.csv`;
+            mostrarToast(`${projetosFiltradosAtuais.length} projeto(s) exportado(s) em CSV com sucesso!`, 'sucesso');
+        });
+    }
+
+    if (btnExportJson) {
+        btnExportJson.addEventListener('click', (e) => {
+            if (!btnExportJson.hasAttribute('href') || !btnExportJson.getAttribute('href')) {
+                e.preventDefault();
+                mostrarToast('Nenhum projeto disponível para exportar.', 'info');
+                return;
+            }
+            // Atualiza timestamp para o arquivo baixado
+            btnExportJson.download = `projetos_${obterTimestampArquivo()}.json`;
+            mostrarToast(`${projetosFiltradosAtuais.length} projeto(s) exportado(s) em JSON com sucesso!`, 'sucesso');
+        });
+    }
 }
 
 /**
