@@ -1353,8 +1353,9 @@ mark.highlight {
 }
 
 .modal-edicao-card textarea {
-    min-height: 90px;
-    resize: vertical;
+    min-height: 76px;
+    max-height: 180px;
+    resize: none;
 }
 
 .modal-edicao-card .modal-acoes {

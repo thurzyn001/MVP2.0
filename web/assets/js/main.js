@@ -1016,12 +1016,15 @@ function abrirModalEdicao(id) {
         const len = textareaEditaDescricao.value.length;
         if (contadorEditaCaracteres) {
             contadorEditaCaracteres.textContent = `${len} / 500`;
-            contadorEditaCaracteres.className = len >= 500 ? 'char-counter limite-atingido' : 'char-counter';
+            contadorEditaCaracteres.className = len >= 500 ? 'char-counter limite-atingido' : (len >= 425 ? 'char-counter limite-alerta' : 'char-counter');
         }
     }
 
     modalEdicao.classList.remove('oculta');
     setTimeout(() => {
+        if (textareaEditaDescricao) {
+            ajustarAlturaTextarea(textareaEditaDescricao, 76, 180);
+        }
         if (inputEditaNome) {
             inputEditaNome.focus();
             inputEditaNome.select();
@@ -1036,6 +1039,9 @@ function fecharModalEdicao() {
     if (!modalEdicao) return;
     modalEdicao.classList.add('oculta');
     if (formEdicao) formEdicao.reset();
+    if (textareaEditaDescricao) {
+        textareaEditaDescricao.style.height = '76px';
+    }
     if (contadorEditaNome) {
         contadorEditaNome.textContent = '0 / 100';
         contadorEditaNome.className = 'char-counter';
@@ -1093,9 +1099,10 @@ function configurarModalEdicao() {
         });
     }
 
-    // Contador de caracteres dinâmico do textarea de edição
+    // Contador de caracteres e auto-expansão do textarea de edição
     if (textareaEditaDescricao && contadorEditaCaracteres) {
         textareaEditaDescricao.addEventListener('input', () => {
+            ajustarAlturaTextarea(textareaEditaDescricao, 76, 180);
             const total = textareaEditaDescricao.value.length;
             const max = 500;
             contadorEditaCaracteres.textContent = `${total} / ${max}`;
@@ -1295,6 +1302,16 @@ function aplicarTema(tema, salvar = true) {
 }
 
 /**
+ * Ajusta dinamicamente a altura de um textarea com base no scrollHeight
+ */
+function ajustarAlturaTextarea(el, minH = 76, maxH = 180) {
+    if (!el) return;
+    el.style.height = 'auto';
+    const novaAltura = Math.min(Math.max(el.scrollHeight, minH), maxH);
+    el.style.height = `${novaAltura}px`;
+}
+
+/**
  * Auto-expansão vertical suave e contador de caracteres para a descrição
  */
 function configurarTextareaDescricao() {
@@ -1302,9 +1319,7 @@ function configurarTextareaDescricao() {
 
     textareaDescricao.addEventListener('input', () => {
         // Redimensiona verticalmente de forma suave (mínimo 76px, máximo 180px)
-        textareaDescricao.style.height = 'auto';
-        const novaAltura = Math.min(Math.max(textareaDescricao.scrollHeight, 76), 180);
-        textareaDescricao.style.height = `${novaAltura}px`;
+        ajustarAlturaTextarea(textareaDescricao, 76, 180);
 
         // Atualização em tempo real do contador de caracteres (limite: 500)
         const total = textareaDescricao.value.length;
