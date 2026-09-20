@@ -467,19 +467,14 @@ textarea::-webkit-scrollbar-thumb:hover {
     cursor: pointer;
     font-family: inherit;
     outline: none;
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), 
+    transition: transform 0.15s ease, 
                 box-shadow 0.2s ease,
                 background-color 0.25s ease,
                 border-color 0.25s ease;
 }
 
-.badge-btn:hover {
-    transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-}
-
 .badge-btn:active {
-    transform: translateY(0) scale(0.97);
+    transform: scale(0.95);
 }
 
 .badge-action-label {
@@ -492,10 +487,25 @@ textarea::-webkit-scrollbar-thumb:hover {
     font-weight: 500;
 }
 
-.badge-btn:hover .badge-action-label {
-    opacity: 0.85;
-    max-width: 140px;
-    margin-left: 4px;
+/* Efeito de expansão suave: APENAS em computadores com mouse */
+@media (hover: hover) and (pointer: fine) {
+    .badge-btn:hover {
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .badge-btn:hover .badge-action-label {
+        opacity: 0.85;
+        max-width: 140px;
+        margin-left: 4px;
+    }
+}
+
+/* Em celulares e telas de toque: desativa a expansão para a data ficar 100% estática */
+@media (hover: none), (max-width: 640px) {
+    .badge-action-label {
+        display: none !important;
+    }
 }
 
 /* Cores por Status */
