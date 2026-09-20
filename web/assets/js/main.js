@@ -112,6 +112,22 @@ function renderizarProjetos(projetos) {
     
     projetos.forEach(projeto => {
         const dataFormatada = new Date(projeto.createdAt).toLocaleDateString('pt-BR');
+        
+        // Determina cores, ícone e próximo status: Pendente ➔ Em Andamento ➔ Concluído
+        let badgeClasse = 'badge-pendente';
+        let proximoStatus = 'Em Andamento';
+        let iconeStatus = '⏳';
+
+        if (projeto.status === 'Em Andamento') {
+            badgeClasse = 'badge-andamento';
+            proximoStatus = 'Concluído';
+            iconeStatus = '⚡';
+        } else if (projeto.status === 'Concluído') {
+            badgeClasse = 'badge-concluido';
+            proximoStatus = 'Pendente';
+            iconeStatus = '✅';
+        }
+
         const div = document.createElement('div');
         div.className = 'projeto-item';
         div.innerHTML = `
@@ -119,8 +135,14 @@ function renderizarProjetos(projetos) {
                 <h3>${escaparHTML(projeto.nome)}</h3>
                 <p>${escaparHTML(projeto.descricao || 'Nenhuma descrição fornecida.')}</p>
                 <div class="projeto-meta">
-                    <span class="badge">${escaparHTML(projeto.status)}</span>
-                    <small style="color: #64748b; margin-left: 10px;">Criado em: ${dataFormatada}</small>
+                    <button type="button" 
+                            class="badge badge-btn ${badgeClasse}" 
+                            onclick="alternarStatus(${projeto.id}, '${proximoStatus}')" 
+                            title="Clique para avançar para: ${proximoStatus}">
+                        <span>${iconeStatus} ${escaparHTML(projeto.status)}</span>
+                        <span class="badge-action-label">➔ ${proximoStatus}</span>
+                    </button>
+                    <small style="color: var(--text-muted); margin-left: 10px;">Criado em: ${dataFormatada}</small>
                 </div>
             </div>
             <div class="projeto-acoes">
@@ -129,6 +151,30 @@ function renderizarProjetos(projetos) {
         `;
         listaProjetos.appendChild(div);
     });
+}
+
+/**
+ * Atualiza o status do projeto no backend (PATCH)
+ */
+async function alternarStatus(id, novoStatus) {
+    try {
+        const response = await fetch(`${API_URL}/${id}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: novoStatus })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.erro || 'Falha ao atualizar status');
+        }
+
+        mostrarToast(`Status alterado para "${novoStatus}"!`, 'sucesso');
+        carregarProjetos();
+    } catch (error) {
+        mostrarToast(error.message, 'erro');
+    }
 }
 
 /**

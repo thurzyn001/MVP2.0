@@ -36,6 +36,30 @@ exports.criar = async (req, res) => {
     }
 };
 
+// Atualiza o status de um projeto (Pendente, Em Andamento, Concluído)
+exports.atualizarStatus = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const statusValidos = ['Pendente', 'Em Andamento', 'Concluído'];
+    if (!status || !statusValidos.includes(status)) {
+        return res.status(400).json({ 
+            erro: `Status inválido. Escolha entre: ${statusValidos.join(', ')}` 
+        });
+    }
+
+    try {
+        const projetoAtualizado = await prisma.projeto.update({
+            where: { id: parseInt(id) },
+            data: { status }
+        });
+        res.json(projetoAtualizado);
+    } catch (error) {
+        console.error("Erro ao atualizar status do projeto:", error);
+        res.status(500).json({ erro: "Erro ao atualizar status do projeto." });
+    }
+};
+
 // Exclui um projeto existente
 exports.deletar = async (req, res) => {
     const { id } = req.params;
