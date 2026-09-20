@@ -51,11 +51,13 @@ Para uma visão aprofundada da topologia multicamadas, tabela completa de endpoi
 
 ## ✨ Principais Funcionalidades
 
-- **CRUD Completo & Transição Rápida de Status (PATCH):** Cadastro, listagem, exclusão segura com modal de confirmação estilizado e avanço de status interativo nos badges (`Pendente` ➔ `Em Andamento` ➔ `Concluído`).
-- **Mini Dashboard de Métricas:** Cards no topo com contadores em tempo real para Total, Pendentes, Em Andamento e Concluídos com animação de contagem fluida.
-- **Busca em Tempo Real & Filtros de Status:** Pesquisa instantânea com destaque visual dos termos (`<mark>`) combinada a chips de status com contadores ativos e estado vazio inteligente com botão de restauração rápida.
-- **Exportação de Relatórios (CSV & JSON):** Geração de planilhas Excel (com separador `;` e `UTF-8 BOM` para caracteres especiais) e dados estruturados JSON, respeitando os filtros selecionados na tela.
-- **Modo Escuro / Claro (Dark Mode):** Alternador animado na barra superior com persistência em `localStorage` e script anti-flash no carregamento.
+- **CRUD 100% Completo & Edição via Modal (`PUT`):** Cadastro com contadores em tempo real, listagem, exclusão segura com modal de confirmação estilizado, edição de nome e descrição via modal glassmorphic e avanço rápido de status nos badges (`Pendente` ➔ `Em Andamento` ➔ `Concluído`).
+- **Reordenação Interativa com Drag-and-Drop:** Arraste e solte intuitivo para reordenar cards tanto no Desktop (HTML5 Drag API) quanto no Mobile (Touch Gestures com `touch-action: none;`), persistido localmente no `localStorage`.
+- **Mini Dashboard com Barra de Progresso:** Cards superiores com contadores numéricos animados (easing cúbico) e barra de progresso horizontal em degradê moderno (`#3b82f6` a `#10b981`) indicando a taxa percentual de conclusão das tarefas.
+- **Barra de Ferramentas Avançada (Busca, Ordenação e Filtros):** Layout de duas linhas com busca instantânea com realce visual (`<mark>`), seletor de ordenação rápida (Mais Recentes, Mais Antigos, A-Z, Z-A e Personalizada) e chips de status com contadores reativos.
+- **Exportação Instantânea de Relatórios (CSV & JSON):** Download veloz via navegador de planilhas Excel (com separador `;` e `UTF-8 BOM` para compatibilidade total com acentos em português) e arquivos JSON estruturados, respeitando rigorosamente a ordem e os filtros ativos.
+- **Validações & Limites Inteligentes (Defense-in-Depth):** Limite estrito de 100 caracteres no título e 500 caracteres na descrição com contadores dinâmicos de proximidade (amarelo e vermelho) e validação no Backend.
+- **Modo Escuro / Claro (Dark Mode):** Alternador animado na barra superior com persistência em `localStorage` e script anti-flash no cabeçalho.
 - **Notificações Toast Responsivas:** Notificações flutuantes modernas com animação de entrada/saída e limite dinâmico de exibição adaptado para telas mobile (máx. 2) e desktop (máx. 5).
 
 ---

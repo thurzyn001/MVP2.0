@@ -4,42 +4,42 @@ Este documento registra as melhorias planejadas, boas práticas identificadas du
 
 ---
 
-## 📌 1. Exportação de Relatórios no Ambiente Mobile (Backend Streaming)
+## 📌 1. Melhorias e Funcionalidades Concluídas
 
-- [ ] **Migrar geração de arquivos CSV/JSON do Client-side (Frontend) para o Server-side (Backend)**
-  - **Contexto & Diagnóstico Atual:**
-    - No Desktop, o download via memória do navegador (`Blob` e `URL.createObjectURL`) funciona de forma contínua e sem restrições.
-    - Em dispositivos móveis (notadamente Google Chrome no Android e Safari no iOS), políticas rigorosas de sandbox e prevenção contra múltiplos downloads automáticos (*Automatic Downloads Prevention*) permitem que o primeiro arquivo seja salvo com sucesso, mas podem restringir downloads consecutivos sem que o usuário recarregue a página.
-  - **Solução Arquitetural Planejada:**
-    - Criar endpoints dedicados no Backend Express:
-      - `GET /api/projetos/export/csv`
-      - `GET /api/projetos/export/json`
-    - O backend realiza a consulta e envia o arquivo diretamente como fluxo HTTP com os cabeçalhos:
-      ```http
-      Content-Type: text/csv; charset=utf-8
-      Content-Disposition: attachment; filename="projetos.csv"
-      ```
-    - **Benefício:** Elimina qualquer dependência de manipulação de memória no navegador móvel, tornando o download 100% nativo e ilimitado em qualquer smartphone ou WebView.
-
----
-
-## 📌 2. Funcionalidades Futuras Planejadas
-
-### 🔹 Edição Completa de Projetos
+### 🔹 CRUD e Edição Completa
 - [x] Modal interativo para edição de nome e descrição de projetos já cadastrados via `PUT /api/projetos/:id` (concluído com validações, contagem de caracteres e acessibilidade).
+- [x] Transição ágil de status nos badges via `PATCH /api/projetos/:id/status`.
 
-### 🔹 Ordenação Dinâmica
+### 🔹 Ordenação e Interatividade Visual
+- [x] Reordenação completa via Drag-and-Drop com cálculo dinâmico de ponto médio e suporte a touch gestures em mobile.
 - [x] Seletor (*dropdown*) integrado para ordenar a listagem por:
   - Mais recentes primeiro (padrão cronológico).
   - Mais antigos primeiro.
   - Ordem alfabética (A-Z e Z-A).
   - Ordem personalizada via Drag-and-Drop (com sincronização bidirecional e persistência em `localStorage`).
 
+### 🔹 Dashboard de Métricas e Feedback
+- [x] Cards superiores com contadores numéricos animados por interpolação cúbica.
+- [x] Barra de progresso horizontal em degradê moderno indicando a taxa percentual de conclusão das tarefas com atributos WAI-ARIA.
+
+### 🔹 Interface e Usabilidade (UI/UX)
+- [x] Reorganização da barra de ferramentas em 2 linhas coordenadas (Linha 1: busca flex + dropdown; Linha 2: pills de status), eliminando qualquer encavalamento visual.
+- [x] Limite de 100 caracteres no título com contadores dinâmicos em tempo real no formulário e no modal de edição.
+- [x] Auto-expansão vertical suave de até 180px no textarea de descrição, eliminação das alças nativas do navegador (`resize: none`) e scrollbar sutil estilizada.
+- [x] Exportação de relatórios em CSV (padrão Excel PT-BR com UTF-8 BOM) e JSON estruturado diretamente pelo navegador via Blob (0ms de latência e sem dependência de rede).
+
+---
+
+## 📌 2. Backlog de Oportunidades Futuras
+
 ### 🔹 Paginação de Dados
 - [ ] Paginação no backend (`take` e `skip` via Prisma ORM) para otimização de performance caso o volume de projetos cadastrados ultrapasse dezenas ou centenas de registros.
 
-### 🔹 Notificações e Confirmações Adicionais
+### 🔹 Atalhos e Produtividade
 - [ ] Implementar atalho de teclado global para cadastro rápido (ex: `Ctrl + Enter` dentro do formulário).
+
+### 🔹 Exportação Server-Side (Streaming)
+- [ ] Endpoints dedicados para exportação direta pelo servidor caso se deseje descarregar a geração de relatórios de bases de dados massivas.
 
 ---
 
