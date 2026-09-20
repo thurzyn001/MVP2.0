@@ -289,7 +289,7 @@ function exportarCSV() {
     // UTF-8 BOM (\uFEFF) garante que caracteres acentuados abram perfeitamente no Excel
     const conteudoCsv = '\uFEFF' + [cabecalhos.join(';'), ...linhas].join('\r\n');
     
-    baixarArquivo(conteudoCsv, `projetos_${obterDataArquivo()}.csv`, 'text/csv;charset=utf-8;');
+    baixarArquivo(conteudoCsv, `projetos_${obterTimestampArquivo()}.csv`, 'text/csv;charset=utf-8;');
     mostrarToast(`${lista.length} projeto(s) exportado(s) em CSV com sucesso!`, 'sucesso');
 }
 
@@ -313,34 +313,54 @@ function exportarJSON() {
     }));
 
     const conteudoJson = JSON.stringify(dadosExportar, null, 2);
-    baixarArquivo(conteudoJson, `projetos_${obterDataArquivo()}.json`, 'application/json;charset=utf-8;');
+    baixarArquivo(conteudoJson, `projetos_${obterTimestampArquivo()}.json`, 'application/json;charset=utf-8;');
     mostrarToast(`${lista.length} projeto(s) exportado(s) em JSON com sucesso!`, 'sucesso');
 }
 
 /**
- * Dispara o download de um arquivo no navegador
+ * Dispara o download de um arquivo no navegador com suporte a múltiplos downloads móveis
  */
 function baixarArquivo(conteudo, nomeArquivo, tipoMime) {
     const blob = new Blob([conteudo], { type: tipoMime });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
+    
     link.href = url;
     link.download = nomeArquivo;
+    link.style.display = 'none';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+
+    // Em celulares (Chrome Android e Safari iOS), se revogar a URL imediatamente,
+    // o gerenciador de downloads não consegue salvar o arquivo e cancela os próximos.
+    // Damos um intervalo seguro de 2.5s antes de revogar a URL temporária.
+    setTimeout(() => {
+        try {
+            if (link.parentNode) {
+                link.parentNode.removeChild(link);
+            }
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            // Ignora se já estiver liberado
+        }
+    }, 2500);
 }
 
 /**
- * Retorna a data no formato YYYY-MM-DD para o nome do arquivo
+ * Retorna data e hora únicas (YYYY-MM-DD_HHMMSS) para cada download
  */
-function obterDataArquivo() {
+function obterTimestampArquivo() {
     const hoje = new Date();
     const ano = hoje.getFullYear();
     const mes = String(hoje.getMonth() + 1).padStart(2, '0');
     const dia = String(hoje.getDate()).padStart(2, '0');
-    return `${ano}-${mes}-${dia}`;
+    const horas = String(hoje.getHours()).padStart(2, '0');
+    const minutos = String(hoje.getMinutes()).padStart(2, '0');
+    const segundos = String(hoje.getSeconds()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}_${horas}${minutos}${segundos}`;
 }
 
 /**
@@ -587,12 +607,14 @@ function configurarEventosModal() {
  * @param {'sucesso'|'erro'|'info'} tipo - Estilo do toast
  */
 function mostrarToast(mensagem, tipo = 'info') {
-    const LIMITE_TOASTS = 5;
+    // No celular (telas menores ou iguais a 640px), limita a no máximo 2 toasts para não cobrir a tela. No PC, mantém até 5.
+    const isMobile = window.innerWidth <= 640;
+    const LIMITE_TOASTS = isMobile ? 2 : 5;
 
-    // Se já atingiu o limite de 5 toasts na tela, fecha o mais antigo com animação suave
+    // Se já atingiu o limite, fecha o(s) mais antigo(s) com animação suave
     const toastsAtivos = Array.from(toastContainer.querySelectorAll('.toast:not(.saindo)'));
-    if (toastsAtivos.length >= LIMITE_TOASTS) {
-        const maisAntigo = toastsAtivos[0];
+    while (toastsAtivos.length >= LIMITE_TOASTS) {
+        const maisAntigo = toastsAtivos.shift();
         maisAntigo.classList.remove('mostrar');
         maisAntigo.classList.add('saindo');
         setTimeout(() => {
