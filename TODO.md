@@ -26,7 +26,7 @@ Este documento registra as melhorias planejadas, boas práticas identificadas du
 ## 📌 2. Funcionalidades Futuras Planejadas
 
 ### 🔹 Edição Completa de Projetos
-- [ ] Modal interativo para edição de nome e descrição de projetos já cadastrados (atualmente a edição rápida contempla a transição de status via `PATCH`).
+- [x] Modal interativo para edição de nome e descrição de projetos já cadastrados via `PUT /api/projetos/:id` (concluído com validações, contagem de caracteres e acessibilidade).
 
 ### 🔹 Ordenação Dinâmica
 - [ ] Seletor (*dropdown*) para ordenar a listagem de projetos por:

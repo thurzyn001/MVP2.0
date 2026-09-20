@@ -1125,6 +1125,101 @@ mark.highlight {
     background-color: var(--border-color);
 }
 
+.btn-sm {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.85rem;
+    border-radius: 0.45rem;
+}
+
+.projeto-acoes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.btn-edit {
+    background-color: var(--item-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+.btn-edit:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background-color: var(--item-hover-bg);
+    transform: translateY(-1px);
+}
+
+/* Modal de Edição (Passo 1) */
+.modal-edicao-card {
+    max-width: 520px;
+    text-align: left;
+    padding: 2rem;
+}
+
+.modal-header-edicao {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.modal-icone-edicao {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background-color: #eff6ff;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+[data-theme="dark"] .modal-icone-edicao {
+    background-color: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
+}
+
+.modal-header-edicao h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-main);
+    flex: 1;
+}
+
+.btn-fechar-modal {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.btn-fechar-modal:hover {
+    color: var(--text-main);
+    background-color: var(--border-color);
+}
+
+.modal-edicao-card .form-group {
+    margin-bottom: 1.25rem;
+}
+
+.modal-edicao-card textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.modal-edicao-card .modal-acoes {
+    margin-top: 1.75rem;
+}
+
 .oculta {
     display: none !important;
 }
@@ -1218,5 +1313,17 @@ mark.highlight {
     .toast {
         min-width: auto;
         width: 100%;
+    }
+    .projeto-acoes {
+        flex-direction: column;
+        gap: 6px;
+    }
+    .projeto-acoes .btn {
+        width: 100%;
+        padding: 0.35rem 0.65rem;
+        font-size: 0.78rem;
+    }
+    .modal-edicao-card {
+        padding: 1.5rem 1.25rem;
     }
 }

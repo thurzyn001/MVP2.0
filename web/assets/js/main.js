@@ -25,6 +25,16 @@ const infoQtdProjetos = document.getElementById('info-quantidade-projetos');
 const btnExportCsv = document.getElementById('btn-export-csv');
 const btnExportJson = document.getElementById('btn-export-json');
 
+// Elementos do Modal de Edição (Passo 1 do Ciclo)
+const modalEdicao = document.getElementById('modal-edicao');
+const formEdicao = document.getElementById('form-edicao');
+const inputEditaId = document.getElementById('edita-projeto-id');
+const inputEditaNome = document.getElementById('edita-nome');
+const textareaEditaDescricao = document.getElementById('edita-descricao');
+const contadorEditaCaracteres = document.getElementById('edita-char-counter');
+const btnCancelarEdicao = document.getElementById('btn-cancelar-edicao');
+const btnFecharModalEdicao = document.getElementById('btn-fechar-modal-edicao');
+
 // Variáveis para controle de estado
 let projetoIdParaExcluir = null;
 let todosOsProjetos = [];
@@ -41,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     verificarStatusApi();
     carregarProjetos();
     configurarEventosModal();
+    configurarModalEdicao();
 });
 
 /**
@@ -451,7 +462,14 @@ function renderizarProjetos(projetos) {
                 </div>
             </div>
             <div class="projeto-acoes">
-                <button class="btn btn-danger" onclick="abrirModalExclusao(${projeto.id})">Excluir</button>
+                <button type="button" class="btn btn-secondary btn-sm btn-edit" onclick="abrirModalEdicao(${projeto.id})" title="Editar projeto" aria-label="Editar projeto">
+                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                    <span>Editar</span>
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="abrirModalExclusao(${projeto.id})" title="Excluir projeto" aria-label="Excluir projeto">Excluir</button>
             </div>
         `;
         listaProjetos.appendChild(div);
@@ -809,6 +827,138 @@ function configurarEventosModal() {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !modalConfirmacao.classList.contains('oculta')) {
             fecharModalExclusao();
+        }
+    });
+}
+
+/**
+ * Abre o modal de edição e preenche os campos com os dados atuais do projeto
+ * @param {number|string} id - ID do projeto a ser editado
+ */
+function abrirModalEdicao(id) {
+    const projeto = todosOsProjetos.find(p => p.id == id);
+    if (!projeto || !modalEdicao) return;
+
+    if (inputEditaId) inputEditaId.value = projeto.id;
+    if (inputEditaNome) inputEditaNome.value = projeto.nome || '';
+    if (textareaEditaDescricao) {
+        textareaEditaDescricao.value = projeto.descricao || '';
+        const len = textareaEditaDescricao.value.length;
+        if (contadorEditaCaracteres) {
+            contadorEditaCaracteres.textContent = `${len} / 500`;
+            contadorEditaCaracteres.className = len >= 500 ? 'char-counter limite-atingido' : 'char-counter';
+        }
+    }
+
+    modalEdicao.classList.remove('oculta');
+    setTimeout(() => {
+        if (inputEditaNome) {
+            inputEditaNome.focus();
+            inputEditaNome.select();
+        }
+    }, 60);
+}
+
+/**
+ * Fecha o modal de edição e reseta os campos
+ */
+function fecharModalEdicao() {
+    if (!modalEdicao) return;
+    modalEdicao.classList.add('oculta');
+    if (formEdicao) formEdicao.reset();
+}
+
+/**
+ * Configura os listeners e submissão do modal de edição (Passo 1 do Ciclo)
+ */
+function configurarModalEdicao() {
+    if (!modalEdicao || !formEdicao) return;
+
+    // Botão Cancelar
+    if (btnCancelarEdicao) {
+        btnCancelarEdicao.addEventListener('click', fecharModalEdicao);
+    }
+
+    // Botão X de fechar
+    if (btnFecharModalEdicao) {
+        btnFecharModalEdicao.addEventListener('click', fecharModalEdicao);
+    }
+
+    // Fechar ao clicar fora do card (backdrop)
+    modalEdicao.addEventListener('click', (e) => {
+        if (e.target === modalEdicao) {
+            fecharModalEdicao();
+        }
+    });
+
+    // Fechar ao pressionar ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modalEdicao.classList.contains('oculta')) {
+            fecharModalEdicao();
+        }
+    });
+
+    // Contador de caracteres dinâmico do textarea de edição
+    if (textareaEditaDescricao && contadorEditaCaracteres) {
+        textareaEditaDescricao.addEventListener('input', () => {
+            const total = textareaEditaDescricao.value.length;
+            const max = 500;
+            contadorEditaCaracteres.textContent = `${total} / ${max}`;
+
+            if (total >= max) {
+                contadorEditaCaracteres.className = 'char-counter limite-atingido';
+            } else if (total >= max * 0.85) {
+                contadorEditaCaracteres.className = 'char-counter limite-alerta';
+            } else {
+                contadorEditaCaracteres.className = 'char-counter';
+            }
+        });
+    }
+
+    // Submissão do formulário de edição (PUT)
+    formEdicao.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const id = inputEditaId ? inputEditaId.value : null;
+        const nome = inputEditaNome ? inputEditaNome.value.trim() : '';
+        const descricao = textareaEditaDescricao ? textareaEditaDescricao.value.trim() : '';
+
+        if (!nome) {
+            mostrarToast('Atenção: O nome do projeto é obrigatório.', 'erro');
+            return;
+        }
+
+        const btnSalvar = document.getElementById('btn-salvar-edicao');
+        const textoOriginal = btnSalvar ? btnSalvar.textContent : 'Salvar Alterações';
+        if (btnSalvar) {
+            btnSalvar.disabled = true;
+            btnSalvar.textContent = 'Salvando...';
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, descricao })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.erro || 'Falha ao atualizar o projeto.');
+            }
+
+            mostrarToast('Projeto atualizado com sucesso!', 'sucesso');
+            fecharModalEdicao();
+            carregarProjetos();
+
+        } catch (error) {
+            mostrarToast(error.message, 'erro');
+        } finally {
+            if (btnSalvar) {
+                btnSalvar.disabled = false;
+                btnSalvar.textContent = textoOriginal;
+            }
         }
     });
 }

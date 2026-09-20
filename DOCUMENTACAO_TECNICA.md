@@ -68,6 +68,7 @@ A API expõe endpoints estruturados conforme os padrões REST, utilizando códig
 | **GET** | `/api/teste` | Verificação de integridade (*Health Check*) | N/A | `{ "mensagem": "..." }` |
 | **GET** | `/api/projetos` | Recupera a lista completa de projetos | N/A | `[ { "id": 1, "nome": "...", ... } ]` |
 | **POST** | `/api/projetos` | Cadastra um novo projeto | `{ "nome": "...", "descricao": "..." }` | `201 Created` com o objeto criado |
+| **PUT** | `/api/projetos/:id` | Atualiza dados cadastrais (Nome e Descrição) | `{ "nome": "...", "descricao": "..." }` | `200 OK` com o objeto atualizado |
 | **PATCH** | `/api/projetos/:id/status` | Atualiza cirurgicamente o status | `{ "status": "Em Andamento" }` | `200 OK` com o objeto atualizado |
 | **DELETE** | `/api/projetos/:id` | Remove permanentemente um registro | N/A | `{ "mensagem": "Projeto deletado" }` |
 
@@ -75,29 +76,34 @@ A API expõe endpoints estruturados conforme os padrões REST, utilizando códig
 
 ## ✨ 4. Funcionalidades e Diferenciais de Engenharia
 
-### 1. CRUD Completo com Status Dinâmico (PATCH)
-* Transição de estados em ciclo contínuo: `Pendente` ➔ `Em Andamento` ➔ `Concluído` ➔ `Pendente`.
-* O uso de `PATCH` garante que apenas a propriedade de status seja enviada e alterada na base de dados, reduzindo overhead de tráfego de rede.
+### 1. CRUD 100% Completo (Create, Read, Update, Delete)
+* **Edição Cadastral Completa (`PUT`):** Modal interativo com formulário pré-preenchido que permite alterar título e descrição de projetos já cadastrados, contando com validação de campos obrigatórios e limite de 500 caracteres.
+* **Transição Ágil de Status (`PATCH`):** Ciclo contínuo `Pendente` ➔ `Em Andamento` ➔ `Concluído` ➔ `Pendente`. O uso de `PATCH` garante alteração pontual no banco de dados sem overhead de rede.
 
-### 2. Mini Dashboard de Métricas em Tempo Real
+### 2. Reordenação Interativa com Drag-and-Drop (Arrastar e Soltar)
+* **Cálculo de Ponto Médio Dinâmico:** Ao arrastar um card, o sistema calcula o centro vertical dos outros cards em tempo real e reposiciona os elementos automaticamente.
+* **Compatibilidade Desktop e Mobile:** Alça de arrasto dedicada (`.drag-handle`) com suporte a HTML5 Drag API no mouse e Touch Gestures nativos com `touch-action: none;` no celular.
+* **Persistência Local:** Ordem personalizada persistida no `localStorage`, restaurada no reload e sincronizada com as exportações em CSV/JSON.
+
+### 3. Mini Dashboard de Métricas em Tempo Real
 * Cards superiores calculam em memória o total de projetos e a contagem por cada status.
 * **Microinteração:** Função de animação com interpolação cúbica (*cubic easing*) via `requestAnimationFrame` para atualização visual fluida dos números.
 
-### 3. Mecanismo de Busca e Filtros Vivos
+### 4. Mecanismo de Busca e Filtros Vivos
 * Busca instantânea por correspondência case-insensitive em tempo real nos campos de título e descrição.
 * **Destaque Visual Seguro:** Realce dos termos pesquisados (`<mark class="highlight">`) com sanitização prévia contra ataques de Cross-Site Scripting (XSS).
 * Filtros por chips de status combináveis com contadores independentes.
 * Estado vazio contextualizado com atalho de limpeza rápida de filtros.
 
-### 4. Exportação de Dados em CSV e JSON
+### 5. Exportação de Dados em CSV e JSON
 * **CSV:** Formatação otimizada para o padrão nacional do Microsoft Excel (delimitador ponto e vírgula `;`) e inclusão de **UTF-8 BOM** (`\uFEFF`) para preservar acentos e caracteres especiais.
 * **JSON:** Exportação estruturada para interoperabilidade ou backup.
 * **Filtro Ativo:** A exportação respeita exatamente os dados visíveis no momento de acordo com os filtros selecionados pelo usuário.
 
-### 5. Boas Práticas de Interface e Usabilidade (UI/UX)
+### 6. Boas Práticas de Interface e Usabilidade (UI/UX)
 * **Tema Escuro / Claro (Dark Mode):** Alternador estilizado com persistência em `localStorage` e script anti-flash no cabeçalho do documento para evitar oscilações visuais de carregamento.
 * **Sistema de Notificações Toast:** Toasts flutuantes com auto-fechamento e limite adaptativo de exibição (máximo de 2 no mobile para evitar obstrução visual e até 5 no desktop).
-* **Modal de Confirmação Glassmorphic:** Substituição de diálogos bloqueantes (`window.confirm`) por modal assíncrono com suporte ao teclado (`Escape` para cancelar).
+* **Modais Assíncronos Glassmorphic:** Modais modernos para exclusão e edição com suporte a acessibilidade via teclado (`Escape` para fechar e clique no backdrop).
 * **Textarea Inteligente:** Auto-expansão vertical proporcional até 180px com barra de rolagem suave e contador de limite máximo de 500 caracteres com alertas de cores.
 
 ---

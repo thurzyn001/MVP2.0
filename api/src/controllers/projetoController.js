@@ -78,3 +78,32 @@ exports.deletar = async (req, res) => {
         res.status(500).json({ erro: "Erro ao deletar projeto. Verifique se ele existe." });
     }
 };
+
+// Atualiza dados de um projeto existente (Nome e Descrição)
+exports.atualizar = async (req, res) => {
+    const { id } = req.params;
+    const { nome, descricao } = req.body;
+
+    if (!nome || nome.trim() === '') {
+        return res.status(400).json({ erro: "Atenção: O nome do projeto é obrigatório." });
+    }
+
+    if (descricao && descricao.trim().length > 500) {
+        return res.status(400).json({ erro: "Atenção: A descrição não pode ultrapassar 500 caracteres." });
+    }
+
+    try {
+        const projetoAtualizado = await prisma.projeto.update({
+            where: { id: parseInt(id) },
+            data: { 
+                nome: nome.trim(), 
+                descricao: descricao ? descricao.trim() : null 
+            }
+        });
+        res.json(projetoAtualizado);
+    } catch (error) {
+        console.error("Erro ao atualizar dados do projeto:", error);
+        res.status(500).json({ erro: "Erro ao atualizar projeto. Verifique se ele existe." });
+    }
+};
+
