@@ -42,4 +42,4 @@ Este documento registra as melhorias planejadas, boas práticas identificadas du
 
 ---
 
-*Documento mantido como parte dos critérios de engenharia de software e boas práticas de desenvolvimento da disciplina de Laboratório de Programação I.*
+*Documento mantido como parte dos critérios de engenharia de software e boas práticas de desenvolvimento da disciplina de Laboratório de Programação II.*

@@ -1,6 +1,6 @@
 # 📘 Documentação Técnica: Gerenciador de Projetos
 
-Este documento detalha as especificações técnicas, decisões de arquitetura e o modelo de comunicação do **Gerenciador de Projetos**, desenvolvido para a disciplina de **Laboratório de Programação I**.
+Este documento detalha as especificações técnicas, decisões de arquitetura e o modelo de comunicação do **Gerenciador de Projetos**, desenvolvido para a disciplina de **Laboratório de Programação II**.
 
 ---
 
@@ -110,4 +110,4 @@ A API expõe endpoints estruturados conforme os padrões REST, utilizando códig
 
 ---
 
-*Documentação mantida como artefato técnico para avaliação na disciplina de Laboratório de Programação I.*
+*Documentação mantida como artefato técnico para avaliação na disciplina de Laboratório de Programação II.*

@@ -113,4 +113,4 @@ Este projeto foi desenhado para plataformas gratuitas modernas. Siga os passos a
 🎉 **Pronto!** O seu frontend na Vercel está agora se comunicando com o seu backend no Render, salvando e excluindo dados permanentemente no banco de dados Neon. Tudo online!
 
 ---
-*Trabalho desenvolvido para a disciplina de Laboratório de Programação I como forma de demonstração prática dos conhecimentos adquiridos e obtenção de nota avaliativa.*
+*Trabalho desenvolvido para a disciplina de Laboratório de Programação II como forma de demonstração prática dos conhecimentos adquiridos e obtenção de nota avaliativa.*
