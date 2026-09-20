@@ -105,6 +105,7 @@ async function carregarProjetos() {
 
         const projetos = await response.json();
         todosOsProjetos = Array.isArray(projetos) ? projetos : [];
+        aplicarOrdemSalva();
         atualizarMetricas(todosOsProjetos);
         atualizarContadoresFiltros(todosOsProjetos);
         aplicarFiltros();
@@ -415,7 +416,18 @@ function renderizarProjetos(projetos) {
 
         const div = document.createElement('div');
         div.className = 'projeto-item';
+        div.dataset.id = projeto.id;
         div.innerHTML = `
+            <div class="drag-handle" title="Arraste para reordenar" aria-label="Arraste para reordenar">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <circle cx="9" cy="5" r="1.5"></circle>
+                    <circle cx="9" cy="12" r="1.5"></circle>
+                    <circle cx="9" cy="19" r="1.5"></circle>
+                    <circle cx="15" cy="5" r="1.5"></circle>
+                    <circle cx="15" cy="12" r="1.5"></circle>
+                    <circle cx="15" cy="19" r="1.5"></circle>
+                </svg>
+            </div>
             <div class="projeto-info">
                 <h3>${destacarTermo(projeto.nome, termoBusca)}</h3>
                 <p>${destacarTermo(projeto.descricao || 'Nenhuma descrição fornecida.', termoBusca)}</p>
@@ -444,6 +456,213 @@ function renderizarProjetos(projetos) {
         `;
         listaProjetos.appendChild(div);
     });
+
+    configurarDragAndDrop();
+}
+
+/**
+ * Aplica a ordem personalizada dos projetos salva no localStorage
+ */
+function aplicarOrdemSalva() {
+    try {
+        const ordemSalva = localStorage.getItem('projetos_ordem');
+        if (!ordemSalva) return;
+
+        const idsOrdenados = JSON.parse(ordemSalva);
+        if (!Array.isArray(idsOrdenados) || idsOrdenados.length === 0) return;
+
+        const posicoes = new Map();
+        idsOrdenados.forEach((id, index) => {
+            posicoes.set(isNaN(Number(id)) ? id : Number(id), index);
+        });
+
+        todosOsProjetos.sort((a, b) => {
+            const posA = posicoes.has(a.id) ? posicoes.get(a.id) : -1;
+            const posB = posicoes.has(b.id) ? posicoes.get(b.id) : -1;
+
+            if (posA === -1 && posB === -1) return 0;
+            if (posA === -1) return -1;
+            if (posB === -1) return 1;
+
+            return posA - posB;
+        });
+
+        // Limpa referências a projetos excluídos
+        const idsExistentes = new Set(todosOsProjetos.map(p => p.id));
+        const idsAtualizados = idsOrdenados.filter(id => idsExistentes.has(isNaN(Number(id)) ? id : Number(id)));
+        if (idsAtualizados.length !== idsOrdenados.length) {
+            localStorage.setItem('projetos_ordem', JSON.stringify(idsAtualizados));
+        }
+    } catch (e) {
+        console.warn('Não foi possível carregar a ordem salva:', e);
+    }
+}
+
+/**
+ * Configura o sistema de arrastar e soltar (Drag and Drop) para reordenação de projetos.
+ * Suporta Desktop (HTML5 Drag & Drop com alça) e Mobile (Touch Gestures).
+ */
+function configurarDragAndDrop() {
+    if (!listaProjetos) return;
+
+    const cards = listaProjetos.querySelectorAll('.projeto-item');
+    if (cards.length === 0) return;
+
+    cards.forEach(card => {
+        const handle = card.querySelector('.drag-handle');
+        if (!handle) return;
+
+        let handlePressionada = false;
+
+        // Desktop: Mousedown na alça habilita o drag no card
+        handle.addEventListener('mousedown', () => {
+            handlePressionada = true;
+            card.setAttribute('draggable', 'true');
+        });
+
+        card.addEventListener('dragstart', (e) => {
+            if (!handlePressionada) {
+                e.preventDefault();
+                return;
+            }
+            card.classList.add('dragging');
+            if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', card.dataset.id || '');
+            }
+        });
+
+        card.addEventListener('dragend', () => {
+            handlePressionada = false;
+            card.classList.remove('dragging');
+            card.setAttribute('draggable', 'false');
+            salvarNovaOrdem();
+        });
+
+        // Mobile: Eventos de Touch dedicados na alça
+        handle.addEventListener('touchstart', () => {
+            card.classList.add('dragging');
+        }, { passive: true });
+
+        handle.addEventListener('touchmove', (e) => {
+            if (!card.classList.contains('dragging')) return;
+            if (e.cancelable) e.preventDefault();
+
+            const touchY = e.touches[0].clientY;
+            const proximoElemento = obterElementoAposPosicao(listaProjetos, touchY);
+
+            if (proximoElemento == null) {
+                listaProjetos.appendChild(card);
+            } else if (proximoElemento !== card) {
+                listaProjetos.insertBefore(card, proximoElemento);
+            }
+        }, { passive: false });
+
+        handle.addEventListener('touchend', () => {
+            if (card.classList.contains('dragging')) {
+                card.classList.remove('dragging');
+                salvarNovaOrdem();
+            }
+        });
+
+        handle.addEventListener('touchcancel', () => {
+            if (card.classList.contains('dragging')) {
+                card.classList.remove('dragging');
+                salvarNovaOrdem();
+            }
+        });
+    });
+
+    // Listener global no container para dragover de mouse desktop (apenas uma vez)
+    if (!listaProjetos._dragOverConfigurado) {
+        listaProjetos.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const draggingCard = listaProjetos.querySelector('.projeto-item.dragging');
+            if (!draggingCard) return;
+
+            const proximoElemento = obterElementoAposPosicao(listaProjetos, e.clientY);
+            if (proximoElemento == null) {
+                listaProjetos.appendChild(draggingCard);
+            } else if (proximoElemento !== draggingCard) {
+                listaProjetos.insertBefore(draggingCard, proximoElemento);
+            }
+        });
+
+        // Reseta atributos draggable caso o usuário solte o mouse fora
+        document.addEventListener('mouseup', () => {
+            const cardsArrastaveis = listaProjetos.querySelectorAll('.projeto-item[draggable="true"]');
+            cardsArrastaveis.forEach(c => {
+                if (!c.classList.contains('dragging')) {
+                    c.setAttribute('draggable', 'false');
+                }
+            });
+        });
+
+        listaProjetos._dragOverConfigurado = true;
+    }
+}
+
+/**
+ * Calcula qual elemento deve ficar após a posição Y atual do cursor/toque
+ * baseando-se no ponto médio (centro vertical) dos outros cards
+ * @param {HTMLElement} container - O container da lista
+ * @param {number} y - Posição Y (clientY) do cursor ou toque
+ * @returns {HTMLElement|null} - O elemento que deve ficar imediatamente abaixo do item arrastado
+ */
+function obterElementoAposPosicao(container, y) {
+    const elementosArrastaveis = [...container.querySelectorAll('.projeto-item:not(.dragging)')];
+
+    return elementosArrastaveis.reduce((maisProximo, elemento) => {
+        const box = elemento.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+
+        if (offset < 0 && offset > maisProximo.offset) {
+            return { offset: offset, element: elemento };
+        } else {
+            return maisProximo;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+/**
+ * Salva a nova ordem dos projetos no localStorage e sincroniza as listas em memória
+ */
+function salvarNovaOrdem() {
+    const cards = listaProjetos.querySelectorAll('.projeto-item[data-id]');
+    if (!cards || cards.length === 0) return;
+
+    const idsVisiveis = Array.from(cards).map(card => {
+        const idRaw = card.dataset.id;
+        return isNaN(Number(idRaw)) ? idRaw : Number(idRaw);
+    });
+
+    let ordemCompleta = todosOsProjetos.map(p => p.id);
+
+    if (statusFiltro === 'todos' && !termoBusca) {
+        ordemCompleta = idsVisiveis;
+    } else {
+        const visiveisSet = new Set(idsVisiveis);
+        let ptr = 0;
+        ordemCompleta = ordemCompleta.map(id => {
+            if (visiveisSet.has(id)) {
+                return idsVisiveis[ptr++];
+            }
+            return id;
+        });
+    }
+
+    try {
+        localStorage.setItem('projetos_ordem', JSON.stringify(ordemCompleta));
+    } catch (e) {
+        console.warn('Erro ao salvar ordem no localStorage:', e);
+    }
+
+    const mapa = new Map(todosOsProjetos.map(p => [p.id, p]));
+    todosOsProjetos = ordemCompleta.map(id => mapa.get(id)).filter(Boolean);
+
+    const idsVisiveisSet = new Set(idsVisiveis);
+    projetosFiltradosAtuais = todosOsProjetos.filter(p => idsVisiveisSet.has(p.id));
+    atualizarLinksExportacao(projetosFiltradosAtuais);
 }
 
 /**

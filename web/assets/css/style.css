@@ -754,14 +754,49 @@ mark.highlight {
     border: 1px solid var(--border-color);
     border-radius: 0.5rem;
     margin-bottom: 1rem;
-    transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s, border-color 0.2s, opacity 0.2s;
     background-color: var(--item-bg);
+    position: relative;
 }
 
 .projeto-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     background-color: var(--item-hover-bg);
+}
+
+.projeto-item.dragging {
+    opacity: 0.45;
+    background-color: var(--item-hover-bg);
+    border: 2px dashed var(--primary-color);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
+    transform: scale(1.01);
+}
+
+.drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    cursor: grab;
+    padding: 6px 10px 6px 0;
+    margin-right: 6px;
+    align-self: center;
+    touch-action: none;
+    opacity: 0.5;
+    transition: opacity 0.2s, color 0.2s, transform 0.2s;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.drag-handle:hover {
+    opacity: 1;
+    color: var(--primary-color);
+    transform: scale(1.15);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
 }
 
 .projeto-info {
@@ -1170,6 +1205,10 @@ mark.highlight {
     }
     .filtros-status::-webkit-scrollbar {
         display: none;
+    }
+    .drag-handle {
+        padding: 6px 10px 6px 0;
+        opacity: 0.8;
     }
     .toast-container {
         left: 16px;
