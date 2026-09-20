@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const projetoController = require('../controllers/projetoController');
 
+// Exportação de relatórios (rotas específicas antes de rotas com parâmetros)
+router.get('/export/csv', projetoController.exportarCsv);
+router.get('/export/json', projetoController.exportarJson);
+
 // Lista todos os projetos
 router.get('/', projetoController.listar);
 

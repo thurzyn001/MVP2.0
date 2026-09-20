@@ -290,9 +290,9 @@ function configurarOrdenacao() {
 }
 
 /**
- * Atualiza os links nativos <a> de exportação de acordo com os projetos filtrados atuais.
- * O uso de links nativos <a> com o atributo download garante funcionamento 100% contínuo
- * em dispositivos móveis (Android Chrome e Safari iOS) sem sofrer com bloqueio de downloads automáticos.
+ * Atualiza os links de exportação para apontarem para as rotas Server-Side do Backend Express.
+ * O streaming HTTP nativo com cabeçalho 'Content-Disposition: attachment' resolve definitivamente
+ * qualquer restrição de download consecutivo em navegadores mobile (Android Chrome e Safari iOS).
  */
 function atualizarLinksExportacao(lista = []) {
     if (!btnExportCsv || !btnExportJson) return;
@@ -305,7 +305,74 @@ function atualizarLinksExportacao(lista = []) {
         return;
     }
 
-    // 1. Gera Blob do CSV (Padrão Excel PT-BR com ponto e vírgula e UTF-8 BOM)
+    // Prepara parâmetros de busca/filtro/ordenação e IDs para a rota Server-Side do Backend
+    const ids = lista.map(p => p.id).join(',');
+    const params = new URLSearchParams();
+    if (ids) params.set('ids', ids);
+    if (statusFiltro && statusFiltro !== 'todos') params.set('status', statusFiltro);
+    if (termoBusca && termoBusca.trim()) params.set('busca', termoBusca.trim());
+    if (tipoOrdenacao) params.set('ordem', tipoOrdenacao);
+
+    // URL direta para os endpoints Express com fluxo HTTP (Server-Side Streaming)
+    const urlCsv = `${API_URL}/export/csv?${params.toString()}`;
+    const urlJson = `${API_URL}/export/json?${params.toString()}`;
+
+    btnExportCsv.href = urlCsv;
+    btnExportJson.href = urlJson;
+    btnExportCsv.setAttribute('download', '');
+    btnExportJson.setAttribute('download', '');
+}
+
+/**
+ * Configura os listeners dos links de exportação (CSV e JSON)
+ * Dispara notificação imediata e, se a API estiver offline, utiliza fallback local via Blob.
+ */
+function configurarExportacao() {
+    if (btnExportCsv) {
+        btnExportCsv.addEventListener('click', (e) => {
+            if (!projetosFiltradosAtuais || projetosFiltradosAtuais.length === 0) {
+                e.preventDefault();
+                mostrarToast('Nenhum projeto disponível para exportar.', 'info');
+                return;
+            }
+
+            // Fallback de contingência caso a API esteja temporariamente offline
+            const apiOffline = statusBadge && statusBadge.classList.contains('status-offline');
+            if (apiOffline) {
+                e.preventDefault();
+                baixarCsvClientSide(projetosFiltradosAtuais);
+                return;
+            }
+
+            mostrarToast(`Baixando ${projetosFiltradosAtuais.length} projeto(s) em CSV via servidor...`, 'sucesso');
+        });
+    }
+
+    if (btnExportJson) {
+        btnExportJson.addEventListener('click', (e) => {
+            if (!projetosFiltradosAtuais || projetosFiltradosAtuais.length === 0) {
+                e.preventDefault();
+                mostrarToast('Nenhum projeto disponível para exportar.', 'info');
+                return;
+            }
+
+            // Fallback de contingência caso a API esteja temporariamente offline
+            const apiOffline = statusBadge && statusBadge.classList.contains('status-offline');
+            if (apiOffline) {
+                e.preventDefault();
+                baixarJsonClientSide(projetosFiltradosAtuais);
+                return;
+            }
+
+            mostrarToast(`Baixando ${projetosFiltradosAtuais.length} projeto(s) em JSON via servidor...`, 'sucesso');
+        });
+    }
+}
+
+/**
+ * Fallback resiliente: Exporta CSV no cliente se a API estiver offline
+ */
+function baixarCsvClientSide(lista) {
     const cabecalhos = ['ID', 'Nome do Projeto', 'Descrição', 'Status', 'Data de Criação'];
     const linhas = lista.map(p => {
         const id = p.id;
@@ -318,16 +385,22 @@ function atualizarLinksExportacao(lista = []) {
     });
 
     const conteudoCsv = '\uFEFF' + [cabecalhos.join(';'), ...linhas].join('\r\n');
-    const blobCsv = new Blob([conteudoCsv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([conteudoCsv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `projetos_${obterTimestampArquivo()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    mostrarToast(`${lista.length} projeto(s) exportado(s) localmente em CSV!`, 'sucesso');
+}
 
-    if (btnExportCsv._blobUrl) {
-        URL.revokeObjectURL(btnExportCsv._blobUrl);
-    }
-    btnExportCsv._blobUrl = URL.createObjectURL(blobCsv);
-    btnExportCsv.href = btnExportCsv._blobUrl;
-    btnExportCsv.download = `projetos_${obterTimestampArquivo()}.csv`;
-
-    // 2. Gera Blob do JSON
+/**
+ * Fallback resiliente: Exporta JSON no cliente se a API estiver offline
+ */
+function baixarJsonClientSide(lista) {
     const dadosExportar = lista.map(p => ({
         id: p.id,
         nome: p.nome,
@@ -338,45 +411,16 @@ function atualizarLinksExportacao(lista = []) {
     }));
 
     const conteudoJson = JSON.stringify(dadosExportar, null, 2);
-    const blobJson = new Blob([conteudoJson], { type: 'application/json;charset=utf-8;' });
-
-    if (btnExportJson._blobUrl) {
-        URL.revokeObjectURL(btnExportJson._blobUrl);
-    }
-    btnExportJson._blobUrl = URL.createObjectURL(blobJson);
-    btnExportJson.href = btnExportJson._blobUrl;
-    btnExportJson.download = `projetos_${obterTimestampArquivo()}.json`;
-}
-
-/**
- * Configura os listeners dos links nativos de exportação (CSV e JSON)
- */
-function configurarExportacao() {
-    if (btnExportCsv) {
-        btnExportCsv.addEventListener('click', (e) => {
-            if (!btnExportCsv.hasAttribute('href') || !btnExportCsv.getAttribute('href')) {
-                e.preventDefault();
-                mostrarToast('Nenhum projeto disponível para exportar.', 'info');
-                return;
-            }
-            // Atualiza timestamp para o arquivo baixado
-            btnExportCsv.download = `projetos_${obterTimestampArquivo()}.csv`;
-            mostrarToast(`${projetosFiltradosAtuais.length} projeto(s) exportado(s) em CSV com sucesso!`, 'sucesso');
-        });
-    }
-
-    if (btnExportJson) {
-        btnExportJson.addEventListener('click', (e) => {
-            if (!btnExportJson.hasAttribute('href') || !btnExportJson.getAttribute('href')) {
-                e.preventDefault();
-                mostrarToast('Nenhum projeto disponível para exportar.', 'info');
-                return;
-            }
-            // Atualiza timestamp para o arquivo baixado
-            btnExportJson.download = `projetos_${obterTimestampArquivo()}.json`;
-            mostrarToast(`${projetosFiltradosAtuais.length} projeto(s) exportado(s) em JSON com sucesso!`, 'sucesso');
-        });
-    }
+    const blob = new Blob([conteudoJson], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `projetos_${obterTimestampArquivo()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    mostrarToast(`${lista.length} projeto(s) exportado(s) localmente em JSON!`, 'sucesso');
 }
 
 /**

@@ -6,20 +6,20 @@ Este documento registra as melhorias planejadas, boas práticas identificadas du
 
 ## 📌 1. Exportação de Relatórios no Ambiente Mobile (Backend Streaming)
 
-- [ ] **Migrar geração de arquivos CSV/JSON do Client-side (Frontend) para o Server-side (Backend)**
-  - **Contexto & Diagnóstico Atual:**
+- [x] **Migrar geração de arquivos CSV/JSON do Client-side (Frontend) para o Server-side (Backend)** *(Concluído)*
+  - **Contexto & Diagnóstico:**
     - No Desktop, o download via memória do navegador (`Blob` e `URL.createObjectURL`) funciona de forma contínua e sem restrições.
-    - Em dispositivos móveis (notadamente Google Chrome no Android e Safari no iOS), políticas rigorosas de sandbox e prevenção contra múltiplos downloads automáticos (*Automatic Downloads Prevention*) permitem que o primeiro arquivo seja salvo com sucesso, mas podem restringir downloads consecutivos sem que o usuário recarregue a página.
-  - **Solução Arquitetural Planejada:**
-    - Criar endpoints dedicados no Backend Express:
+    - Em dispositivos móveis (notadamente Google Chrome no Android e Safari no iOS), políticas rigorosas de sandbox e prevenção contra múltiplos downloads automáticos (*Automatic Downloads Prevention*) podem restringir downloads consecutivos sem que o usuário recarregue a página.
+  - **Solução Arquitetural Implementada:**
+    - Endpoints dedicados no Backend Express:
       - `GET /api/projetos/export/csv`
       - `GET /api/projetos/export/json`
     - O backend realiza a consulta e envia o arquivo diretamente como fluxo HTTP com os cabeçalhos:
       ```http
       Content-Type: text/csv; charset=utf-8
-      Content-Disposition: attachment; filename="projetos.csv"
+      Content-Disposition: attachment; filename="projetos_YYYY-MM-DD_HHmmss.csv"
       ```
-    - **Benefício:** Elimina qualquer dependência de manipulação de memória no navegador móvel, tornando o download 100% nativo e ilimitado em qualquer smartphone ou WebView.
+    - **Benefício:** Elimina qualquer dependência de manipulação de memória no navegador móvel, tornando o download 100% nativo e ilimitado em qualquer smartphone ou WebView, com fallback offline local integrado.
 
 ---
 

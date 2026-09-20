@@ -67,6 +67,8 @@ A API expõe endpoints estruturados conforme os padrões REST, utilizando códig
 | :--- | :--- | :--- | :--- | :--- |
 | **GET** | `/api/teste` | Verificação de integridade (*Health Check*) | N/A | `{ "mensagem": "..." }` |
 | **GET** | `/api/projetos` | Recupera a lista completa de projetos | N/A | `[ { "id": 1, "nome": "...", ... } ]` |
+| **GET** | `/api/projetos/export/csv` | Exporta relatório formatado em CSV (*Streaming* HTTP) | Query params (`status`, `busca`, `ordem`, `ids`) | Arquivo `.csv` (`Content-Disposition: attachment`) |
+| **GET** | `/api/projetos/export/json` | Exporta dados estruturados em JSON (*Streaming* HTTP) | Query params (`status`, `busca`, `ordem`, `ids`) | Arquivo `.json` (`Content-Disposition: attachment`) |
 | **POST** | `/api/projetos` | Cadastra um novo projeto | `{ "nome": "...", "descricao": "..." }` | `201 Created` com o objeto criado |
 | **PUT** | `/api/projetos/:id` | Atualiza dados cadastrais (Nome e Descrição) | `{ "nome": "...", "descricao": "..." }` | `200 OK` com o objeto atualizado |
 | **PATCH** | `/api/projetos/:id/status` | Atualiza cirurgicamente o status | `{ "status": "Em Andamento" }` | `200 OK` com o objeto atualizado |
@@ -96,10 +98,12 @@ A API expõe endpoints estruturados conforme os padrões REST, utilizando códig
 * **Filtros por Status:** Chips com contadores numéricos independentes e atualização reativa.
 * **Estado Vazio Contextualizado:** Feedback visual limpo quando a busca ou filtros não retornam resultados, com botão de reset rápido.
 
-### 5. Exportação de Dados em CSV e JSON
-* **CSV:** Formatação otimizada para o padrão nacional do Microsoft Excel (delimitador ponto e vírgula `;`) e inclusão de **UTF-8 BOM** (`\uFEFF`) para preservar acentos e caracteres especiais.
-* **JSON:** Exportação estruturada para interoperabilidade ou backup.
-* **Filtro Ativo:** A exportação respeita exatamente os dados visíveis no momento de acordo com os filtros selecionados pelo usuário.
+### 5. Exportação de Dados em CSV e JSON (Server-Side Streaming & Mobile-Ready)
+* **Arquitetura Server-Side Streaming:** A geração dos arquivos é processada pelo Backend Node.js/Express, transmitindo os arquivos diretamente como fluxo HTTP com os cabeçalhos `Content-Type` e `Content-Disposition: attachment; filename="projetos_...`. Isso elimina as restrições de sandbox e bloqueio de downloads automáticos em navegadores móveis (Android Chrome e Safari iOS), permitindo múltiplos downloads consecutivos sem necessidade de recarregar a tela.
+* **CSV:** Formatação otimizada para o padrão nacional do Microsoft Excel (delimitador ponto e vírgula `;`) e inclusão de **UTF-8 BOM** (`\uFEFF`) para preservar acentos e caracteres especiais da língua portuguesa.
+* **JSON:** Exportação estruturada e identada com data de criação formatada para interoperabilidade, auditoria ou backup.
+* **Filtros e Reordenação Respeitados:** A exportação no servidor suporta query parameters (`status`, `busca`, `ordem`, `ids`), respeitando a busca atual, filtros e a exata ordem personalizada estabelecida no Drag-and-Drop.
+* **Fallback Resiliente:** Caso o Backend esteja temporariamente inacessível, o Frontend ativa automaticamente um fallback local baseado em Blobs para assegurar que o usuário nunca fique sem acesso aos seus dados.
 
 ### 6. Boas Práticas de Interface e Usabilidade (UI/UX)
 * **Tema Escuro / Claro (Dark Mode):** Alternador estilizado com persistência em `localStorage` e script anti-flash no cabeçalho do documento para evitar oscilações visuais de carregamento.
