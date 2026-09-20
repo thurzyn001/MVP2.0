@@ -17,6 +17,8 @@ const btnCancelarModal = document.getElementById('btn-cancelar-modal');
 const btnConfirmarModal = document.getElementById('btn-confirmar-modal');
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const themeLabel = document.getElementById('theme-label');
+const textareaDescricao = document.getElementById('descricao');
+const contadorCaracteres = document.getElementById('contador-caracteres');
 
 // Variável para armazenar o ID do projeto a ser excluído
 let projetoIdParaExcluir = null;
@@ -24,6 +26,7 @@ let projetoIdParaExcluir = null;
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     inicializarTema();
+    configurarTextareaDescricao();
     verificarStatusApi();
     carregarProjetos();
     configurarEventosModal();
@@ -72,6 +75,7 @@ formProjeto.addEventListener('submit', async (e) => {
 
         mostrarToast('Projeto cadastrado com sucesso!', 'sucesso');
         formProjeto.reset(); 
+        resetarTextareaDescricao();
         carregarProjetos();
 
     } catch (error) {
@@ -352,4 +356,42 @@ function aplicarTema(tema, salvar = true) {
         if (salvar) localStorage.setItem('theme', 'light');
     }
 }
+
+/**
+ * Auto-expansão vertical suave e contador de caracteres para a descrição
+ */
+function configurarTextareaDescricao() {
+    if (!textareaDescricao || !contadorCaracteres) return;
+
+    textareaDescricao.addEventListener('input', () => {
+        // Redimensiona verticalmente de forma suave (mínimo 76px, máximo 180px)
+        textareaDescricao.style.height = 'auto';
+        const novaAltura = Math.min(Math.max(textareaDescricao.scrollHeight, 76), 180);
+        textareaDescricao.style.height = `${novaAltura}px`;
+
+        // Atualização em tempo real do contador de caracteres (limite: 500)
+        const total = textareaDescricao.value.length;
+        const max = 500;
+        contadorCaracteres.textContent = `${total} / ${max}`;
+
+        if (total >= max) {
+            contadorCaracteres.className = 'char-counter limite-atingido';
+        } else if (total >= max * 0.85) {
+            contadorCaracteres.className = 'char-counter limite-alerta';
+        } else {
+            contadorCaracteres.className = 'char-counter';
+        }
+    });
+}
+
+/**
+ * Reseta o textarea para a altura e contador iniciais
+ */
+function resetarTextareaDescricao() {
+    if (!textareaDescricao || !contadorCaracteres) return;
+    textareaDescricao.style.height = '76px';
+    contadorCaracteres.textContent = '0 / 500';
+    contadorCaracteres.className = 'char-counter';
+}
+
 

@@ -298,6 +298,60 @@ input:focus, textarea:focus {
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
+/* Área de Texto com Auto-Expansão e Limite */
+textarea {
+    resize: none; /* Desabilita o redimensionamento manual pelo canto */
+    min-height: 76px;
+    max-height: 180px;
+    overflow-y: auto; /* Adiciona barra de rolagem suave apenas se ultrapassar o limite */
+    line-height: 1.5;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s;
+}
+
+/* Barra de rolagem discreta e moderna no textarea */
+textarea::-webkit-scrollbar {
+    width: 6px;
+}
+textarea::-webkit-scrollbar-track {
+    background: transparent;
+}
+textarea::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+}
+textarea::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-muted);
+}
+
+/* Contador de Caracteres */
+.label-with-counter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.label-with-counter label {
+    margin-bottom: 0;
+}
+
+.char-counter {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+}
+
+.char-counter.limite-alerta {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+.char-counter.limite-atingido {
+    color: var(--danger);
+    font-weight: 700;
+}
+
 /* Botões */
 .btn {
     display: inline-flex;

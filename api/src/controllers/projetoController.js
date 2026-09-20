@@ -22,6 +22,10 @@ exports.criar = async (req, res) => {
         return res.status(400).json({ erro: "Atenção: O nome do projeto é obrigatório." });
     }
 
+    if (descricao && descricao.trim().length > 500) {
+        return res.status(400).json({ erro: "Atenção: A descrição não pode ultrapassar 500 caracteres." });
+    }
+
     try {
         const novoProjeto = await prisma.projeto.create({
             data: { 
