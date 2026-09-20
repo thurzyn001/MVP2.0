@@ -20,8 +20,9 @@ const themeLabel = document.getElementById('theme-label');
 const textareaDescricao = document.getElementById('descricao');
 const contadorCaracteres = document.getElementById('contador-caracteres');
 
-// Variável para armazenar o ID do projeto a ser excluído
+// Variáveis para controle de estado
 let projetoIdParaExcluir = null;
+let todosOsProjetos = [];
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
@@ -93,7 +94,9 @@ async function carregarProjetos() {
         if (!response.ok) throw new Error('Falha ao buscar projetos');
 
         const projetos = await response.json();
-        renderizarProjetos(projetos);
+        todosOsProjetos = Array.isArray(projetos) ? projetos : [];
+        atualizarMetricas(todosOsProjetos);
+        renderizarProjetos(todosOsProjetos);
     } catch (error) {
         listaProjetos.innerHTML = `
             <div class="empty-state" style="color: red;">
@@ -163,6 +166,73 @@ function renderizarProjetos(projetos) {
         `;
         listaProjetos.appendChild(div);
     });
+}
+
+/**
+ * Atualiza os contadores no Dashboard de Métricas com animação suave
+ * @param {Array} projetos - Lista de projetos
+ */
+function atualizarMetricas(projetos = []) {
+    const total = projetos.length;
+    let pendentes = 0;
+    let andamento = 0;
+    let concluidos = 0;
+
+    projetos.forEach(p => {
+        if (p.status === 'Em Andamento') {
+            andamento++;
+        } else if (p.status === 'Concluído') {
+            concluidos++;
+        } else {
+            pendentes++;
+        }
+    });
+
+    animarContador('metrica-total', total);
+    animarContador('metrica-pendente', pendentes);
+    animarContador('metrica-andamento', andamento);
+    animarContador('metrica-concluido', concluidos);
+}
+
+/**
+ * Anima a transição numérica de um contador (easing suave)
+ * @param {string} id - ID do elemento DOM
+ * @param {number} valorFinal - Valor alvo da contagem
+ * @param {number} duracao - Duração em ms (padrão: 400ms)
+ */
+function animarContador(id, valorFinal, duracao = 400) {
+    const elemento = document.getElementById(id);
+    if (!elemento) return;
+
+    const valorInicial = parseInt(elemento.textContent, 10) || 0;
+    if (valorInicial === valorFinal) {
+        elemento.textContent = valorFinal;
+        return;
+    }
+
+    if (elemento._animFrame) {
+        cancelAnimationFrame(elemento._animFrame);
+    }
+
+    const tempoInicio = performance.now();
+
+    function atualizar(agora) {
+        const tempoDecorrido = agora - tempoInicio;
+        const progresso = Math.min(tempoDecorrido / duracao, 1);
+        const easeOut = 1 - Math.pow(1 - progresso, 3);
+        const valorAtual = Math.round(valorInicial + (valorFinal - valorInicial) * easeOut);
+
+        elemento.textContent = valorAtual;
+
+        if (progresso < 1) {
+            elemento._animFrame = requestAnimationFrame(atualizar);
+        } else {
+            elemento.textContent = valorFinal;
+            elemento._animFrame = null;
+        }
+    }
+
+    elemento._animFrame = requestAnimationFrame(atualizar);
 }
 
 /**
