@@ -1,17 +1,9 @@
-<?php
-require_once 'ApiClient.php';
-
-// Inicializa a conexão para verificar se a API está no ar
-$api = new ApiClient();
-$statusApi = $api->testarConexao();
-?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciador de Projetos - MVP</title>
-    <!-- CSS Estilizado Profissionalmente (Checkpoint 8) -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -19,24 +11,18 @@ $statusApi = $api->testarConexao();
         <header class="header-main">
             <h1>Painel de Projetos (MVP)</h1>
             
-            <!-- Exibição do Status da API baseado no cURL do PHP -->
-            <div class="api-status <?php echo $statusApi ? 'status-online' : 'status-offline'; ?>">
-                <?php if($statusApi): ?>
-                    <span class="status-indicator"></span> 
-                    API Conectada: <?php echo htmlspecialchars($statusApi['mensagem']); ?>
-                <?php else: ?>
-                    <span class="status-indicator"></span> 
-                    API Offline. Verifique se o servidor Node.js está rodando na porta 3000.
-                <?php endif; ?>
+            <!-- Status da API será atualizado via Javascript -->
+            <div id="api-status-badge" class="api-status status-offline">
+                <span class="status-indicator"></span> 
+                <span id="api-status-text">Verificando status da API...</span>
             </div>
         </header>
 
         <main>
-            <!-- Tela de Cadastro (Checkpoint 6) -->
+            <!-- Tela de Cadastro -->
             <section class="card mb-2">
                 <h2>Cadastrar Novo Projeto</h2>
                 
-                <!-- Div para exibição de mensagens de sucesso ou erro -->
                 <div id="alerta-sistema" class="alerta oculta"></div>
                 
                 <form id="form-projeto">
@@ -57,7 +43,7 @@ $statusApi = $api->testarConexao();
                 </form>
             </section>
 
-            <!-- Lista de Projetos Renderizada via Fetch API (Checkpoint 7) -->
+            <!-- Lista de Projetos -->
             <section class="card">
                 <h2>Projetos Cadastrados</h2>
                 
@@ -68,7 +54,7 @@ $statusApi = $api->testarConexao();
         </main>
     </div>
 
-    <!-- Scripts com Fetch API -->
+    <!-- Scripts -->
     <script src="assets/js/main.js"></script>
 </body>
 </html>
