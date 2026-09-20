@@ -24,6 +24,7 @@ const btnLimparBusca = document.getElementById('btn-limpar-busca');
 const infoQtdProjetos = document.getElementById('info-quantidade-projetos');
 const btnExportCsv = document.getElementById('btn-export-csv');
 const btnExportJson = document.getElementById('btn-export-json');
+const selectOrdenacao = document.getElementById('select-ordenacao');
 
 // Elementos do Modal de Edição (Passo 1 do Ciclo)
 const modalEdicao = document.getElementById('modal-edicao');
@@ -41,12 +42,14 @@ let todosOsProjetos = [];
 let projetosFiltradosAtuais = [];
 let termoBusca = '';
 let statusFiltro = 'todos';
+let tipoOrdenacao = localStorage.getItem('projetos_tipo_ordenacao') || (localStorage.getItem('projetos_ordem') ? 'custom' : 'recentes');
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     inicializarTema();
     configurarTextareaDescricao();
     configurarFiltrosEBusca();
+    configurarOrdenacao();
     configurarExportacao();
     verificarStatusApi();
     carregarProjetos();
@@ -116,7 +119,7 @@ async function carregarProjetos() {
 
         const projetos = await response.json();
         todosOsProjetos = Array.isArray(projetos) ? projetos : [];
-        aplicarOrdemSalva();
+        aplicarOrdenacaoAtual();
         atualizarMetricas(todosOsProjetos);
         atualizarContadoresFiltros(todosOsProjetos);
         aplicarFiltros();
@@ -262,6 +265,23 @@ function limparFiltros() {
     });
 
     aplicarFiltros();
+}
+
+/**
+ * Configura o seletor de ordenação rápida (Passo 3 do Ciclo)
+ */
+function configurarOrdenacao() {
+    if (!selectOrdenacao) return;
+
+    selectOrdenacao.value = tipoOrdenacao;
+
+    selectOrdenacao.addEventListener('change', (e) => {
+        tipoOrdenacao = e.target.value;
+        localStorage.setItem('projetos_tipo_ordenacao', tipoOrdenacao);
+
+        aplicarOrdenacaoAtual();
+        aplicarFiltros();
+    });
 }
 
 /**
@@ -479,6 +499,53 @@ function renderizarProjetos(projetos) {
 }
 
 /**
+ * Aplica a ordenação ativa aos projetos em memória
+ * Opções: 'recentes', 'antigos', 'az', 'za', 'custom'
+ */
+function aplicarOrdenacaoAtual() {
+    if (!Array.isArray(todosOsProjetos) || todosOsProjetos.length === 0) return;
+
+    switch (tipoOrdenacao) {
+        case 'antigos':
+            todosOsProjetos.sort((a, b) => {
+                const dateA = a.createdAt ? new Date(a.createdAt).getTime() : a.id;
+                const dateB = b.createdAt ? new Date(b.createdAt).getTime() : b.id;
+                return dateA - dateB;
+            });
+            break;
+
+        case 'az':
+            todosOsProjetos.sort((a, b) => {
+                const nomeA = (a.nome || '').trim();
+                const nomeB = (b.nome || '').trim();
+                return nomeA.localeCompare(nomeB, 'pt-BR', { sensitivity: 'base' });
+            });
+            break;
+
+        case 'za':
+            todosOsProjetos.sort((a, b) => {
+                const nomeA = (a.nome || '').trim();
+                const nomeB = (b.nome || '').trim();
+                return nomeB.localeCompare(nomeA, 'pt-BR', { sensitivity: 'base' });
+            });
+            break;
+
+        case 'custom':
+            aplicarOrdemSalva();
+            break;
+
+        case 'recentes':
+        default:
+            todosOsProjetos.sort((a, b) => {
+                const dateA = a.createdAt ? new Date(a.createdAt).getTime() : a.id;
+                const dateB = b.createdAt ? new Date(b.createdAt).getTime() : b.id;
+                return dateB - dateA;
+            });
+            break;
+    }
+}
+
+/**
  * Aplica a ordem personalizada dos projetos salva no localStorage
  */
 function aplicarOrdemSalva() {
@@ -673,6 +740,13 @@ function salvarNovaOrdem() {
         localStorage.setItem('projetos_ordem', JSON.stringify(ordemCompleta));
     } catch (e) {
         console.warn('Erro ao salvar ordem no localStorage:', e);
+    }
+
+    // Ao reordenar manualmente via arrasto, sincroniza o seletor para 'custom'
+    tipoOrdenacao = 'custom';
+    localStorage.setItem('projetos_tipo_ordenacao', 'custom');
+    if (selectOrdenacao) {
+        selectOrdenacao.value = 'custom';
     }
 
     const mapa = new Map(todosOsProjetos.map(p => [p.id, p]));

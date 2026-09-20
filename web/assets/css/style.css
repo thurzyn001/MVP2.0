@@ -659,14 +659,24 @@ textarea::-webkit-scrollbar-thumb:hover {
     margin-bottom: 1.5rem;
 }
 
+.toolbar-esquerda {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
 @media (min-width: 860px) {
     .toolbar-projetos {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
     }
+    .toolbar-esquerda {
+        max-width: 580px;
+        flex: 1;
+    }
     .toolbar-projetos .search-box {
-        max-width: 360px;
         flex: 1;
     }
 }
@@ -676,6 +686,57 @@ textarea::-webkit-scrollbar-thumb:hover {
     display: flex;
     align-items: center;
     width: 100%;
+}
+
+/* Seletor de Ordenação Dinâmica (Passo 3 do Ciclo) */
+.sort-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.sort-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: color 0.2s;
+}
+
+.sort-chevron {
+    position: absolute;
+    right: 12px;
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: color 0.2s;
+}
+
+.sort-box select#select-ordenacao {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 100%;
+    padding: 0.65rem 2.2rem 0.65rem 2.25rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    background-color: var(--input-bg);
+    color: var(--text-main);
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s;
+}
+
+.sort-box select#select-ordenacao:hover {
+    border-color: var(--primary-color);
+}
+
+.sort-box select#select-ordenacao:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
 .search-icon {
@@ -1418,5 +1479,12 @@ mark.highlight {
     }
     .modal-edicao-card {
         padding: 1.5rem 1.25rem;
+    }
+    .toolbar-esquerda {
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+    .sort-box {
+        width: 100%;
     }
 }

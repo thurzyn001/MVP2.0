@@ -29,10 +29,11 @@ Este documento registra as melhorias planejadas, boas práticas identificadas du
 - [x] Modal interativo para edição de nome e descrição de projetos já cadastrados via `PUT /api/projetos/:id` (concluído com validações, contagem de caracteres e acessibilidade).
 
 ### 🔹 Ordenação Dinâmica
-- [ ] Seletor (*dropdown*) para ordenar a listagem de projetos por:
-  - Mais recentes primeiro (padrão atual).
+- [x] Seletor (*dropdown*) integrado para ordenar a listagem por:
+  - Mais recentes primeiro (padrão cronológico).
   - Mais antigos primeiro.
-  - Ordem alfabética (A-Z / Z-A).
+  - Ordem alfabética (A-Z e Z-A).
+  - Ordem personalizada via Drag-and-Drop (com sincronização bidirecional e persistência em `localStorage`).
 
 ### 🔹 Paginação de Dados
 - [ ] Paginação no backend (`take` e `skip` via Prisma ORM) para otimização de performance caso o volume de projetos cadastrados ultrapasse dezenas ou centenas de registros.

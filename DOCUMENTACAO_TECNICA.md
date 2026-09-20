@@ -90,11 +90,11 @@ A API expõe endpoints estruturados conforme os padrões REST, utilizando códig
 * **Barra de Progresso Horizontal:** Exibe a taxa percentual de tarefas concluídas em relação ao total, com barra em degradê moderno (`#3b82f6` a `#10b981`), transição de largura suave e texto descritivo contextual (incluindo estado comemorativo de 100% de conclusão).
 * **Acessibilidade:** Implementado com padrão WAI-ARIA (`role="progressbar"`, `aria-valuenow`, `aria-valuemin="0"`, `aria-valuemax="100"`).
 
-### 4. Mecanismo de Busca e Filtros Vivos
-* Busca instantânea por correspondência case-insensitive em tempo real nos campos de título e descrição.
-* **Destaque Visual Seguro:** Realce dos termos pesquisados (`<mark class="highlight">`) com sanitização prévia contra ataques de Cross-Site Scripting (XSS).
-* Filtros por chips de status combináveis com contadores independentes.
-* Estado vazio contextualizado com atalho de limpeza rápida de filtros.
+### 4. Mecanismo de Busca, Ordenação Dinâmica e Filtros Vivos
+* **Busca Instantânea & Destaque Visual Seguro:** Correspondência case-insensitive em tempo real nos campos de título e descrição, com realce visual (`<mark class="highlight">`) e sanitização prévia contra ataques de Cross-Site Scripting (XSS).
+* **Seletor de Ordenação Rápida:** Dropdown integrado à barra de ferramentas que permite ordenar a visualização instantaneamente por *Mais Recentes*, *Mais Antigos*, *Nome A-Z*, *Nome Z-A* e *Ordem Personalizada*. Sincroniza-se de forma bidirecional com o Drag-and-Drop e persiste a preferência em `localStorage`.
+* **Filtros por Status:** Chips com contadores numéricos independentes e atualização reativa.
+* **Estado Vazio Contextualizado:** Feedback visual limpo quando a busca ou filtros não retornam resultados, com botão de reset rápido.
 
 ### 5. Exportação de Dados em CSV e JSON
 * **CSV:** Formatação otimizada para o padrão nacional do Microsoft Excel (delimitador ponto e vírgula `;`) e inclusão de **UTF-8 BOM** (`\uFEFF`) para preservar acentos e caracteres especiais.
