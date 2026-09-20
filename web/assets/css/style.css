@@ -211,33 +211,180 @@ input:focus, textarea:focus {
     padding: 2rem 0;
 }
 
-/* Alertas de Sistema */
-.alerta {
-    padding: 1rem;
-    border-radius: 0.5rem;
-    margin-bottom: 1.5rem;
-    font-weight: 500;
+/* Toasts Flutuantes */
+.toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.toast {
+    pointer-events: auto;
+    min-width: 320px;
+    max-width: 440px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 18px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    animation: fadeIn 0.3s ease-in-out;
+    gap: 12px;
+    border: 1px solid var(--border-color);
+    transform: translateX(120%);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+.toast.mostrar {
+    transform: translateX(0);
+    opacity: 1;
 }
 
-.alerta.erro {
-    background-color: var(--error-bg);
-    color: #991b1b;
-    border: 1px solid #fca5a5;
+.toast.saindo {
+    transform: translateX(120%);
+    opacity: 0;
 }
 
-.alerta.sucesso {
+.toast-icone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.toast.sucesso {
+    border-left: 4px solid var(--success);
+}
+.toast.sucesso .toast-icone {
     background-color: var(--success-bg);
-    color: #065f46;
-    border: 1px solid #6ee7b7;
+    color: var(--success);
+}
+
+.toast.erro {
+    border-left: 4px solid var(--danger);
+}
+.toast.erro .toast-icone {
+    background-color: var(--error-bg);
+    color: var(--danger);
+}
+
+.toast.info {
+    border-left: 4px solid var(--primary-color);
+}
+.toast.info .toast-icone {
+    background-color: #dbeafe;
+    color: var(--primary-color);
+}
+
+.toast-conteudo {
+    flex: 1;
+    font-size: 0.925rem;
+    font-weight: 500;
+    color: var(--text-main);
+    line-height: 1.4;
+}
+
+.toast-fechar {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.toast-fechar:hover {
+    color: var(--text-main);
+    background-color: #f1f5f9;
+}
+
+/* Modal de Confirmação */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-card {
+    background: #ffffff;
+    border-radius: 16px;
+    max-width: 400px;
+    width: 100%;
+    padding: 1.75rem;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleUp {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-icone-perigo {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--error-bg);
+    color: var(--danger);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+}
+
+.modal-card h3 {
+    font-size: 1.35rem;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+}
+
+.modal-card p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.modal-acoes {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.modal-acoes .btn {
+    flex: 1;
+}
+
+.btn-secondary {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+.btn-secondary:hover {
+    background-color: #e2e8f0;
+    color: #1e293b;
 }
 
 .oculta {

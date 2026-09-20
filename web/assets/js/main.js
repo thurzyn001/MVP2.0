@@ -1,23 +1,29 @@
 /**
- * main.js - Lógica de Frontend usando Fetch API
+ * main.js - Lógica de Frontend usando Fetch API com Toasts e Modal moderno
  */
 
-// ATENÇÃO: Quando a API for publicada na nuvem (ex: Render), troque 'http://localhost:3000' pela URL da nuvem.
-// Exemplo: const BASE_URL = 'https://minha-api-node.onrender.com';
+// URL de Produção no Render
 const BASE_URL = 'https://mvp2-0-5szr.onrender.com';
 const API_URL = `${BASE_URL}/api/projetos`;
 
 // Elementos do DOM
 const formProjeto = document.getElementById('form-projeto');
 const listaProjetos = document.getElementById('lista-projetos');
-const alerta = document.getElementById('alerta-sistema');
 const statusBadge = document.getElementById('api-status-badge');
 const statusText = document.getElementById('api-status-text');
+const toastContainer = document.getElementById('toast-container');
+const modalConfirmacao = document.getElementById('modal-confirmacao');
+const btnCancelarModal = document.getElementById('btn-cancelar-modal');
+const btnConfirmarModal = document.getElementById('btn-confirmar-modal');
 
-// Ao carregar a página
+// Variável para armazenar o ID do projeto a ser excluído
+let projetoIdParaExcluir = null;
+
+// Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     verificarStatusApi();
     carregarProjetos();
+    configurarEventosModal();
 });
 
 /**
@@ -61,12 +67,12 @@ formProjeto.addEventListener('submit', async (e) => {
             throw new Error(data.erro || 'Ocorreu um erro desconhecido ao salvar.');
         }
 
-        mostrarAlerta('Projeto cadastrado com sucesso!', 'sucesso');
+        mostrarToast('Projeto cadastrado com sucesso!', 'sucesso');
         formProjeto.reset(); 
         carregarProjetos();
 
     } catch (error) {
-        mostrarAlerta(error.message, 'erro');
+        mostrarToast(error.message, 'erro');
     }
 });
 
@@ -115,7 +121,7 @@ function renderizarProjetos(projetos) {
                 </div>
             </div>
             <div class="projeto-acoes">
-                <button class="btn btn-danger" onclick="deletarProjeto(${projeto.id})">Excluir</button>
+                <button class="btn btn-danger" onclick="abrirModalExclusao(${projeto.id})">Excluir</button>
             </div>
         `;
         listaProjetos.appendChild(div);
@@ -123,32 +129,135 @@ function renderizarProjetos(projetos) {
 }
 
 /**
- * Deleta um projeto (DELETE)
+ * Abre o modal de confirmação para exclusão
  */
-async function deletarProjeto(id) {
-    if (!confirm('Atenção: Tem certeza que deseja excluir?')) return;
+function abrirModalExclusao(id) {
+    projetoIdParaExcluir = id;
+    modalConfirmacao.classList.remove('oculta');
+}
 
-    try {
-        const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        const data = await response.json();
+/**
+ * Fecha o modal de confirmação
+ */
+function fecharModalExclusao() {
+    projetoIdParaExcluir = null;
+    modalConfirmacao.classList.add('oculta');
+}
 
-        if (!response.ok) throw new Error(data.erro || 'Erro ao deletar o projeto');
+/**
+ * Configura os listeners do modal
+ */
+function configurarEventosModal() {
+    btnCancelarModal.addEventListener('click', fecharModalExclusao);
 
-        mostrarAlerta('Projeto excluído com sucesso.', 'sucesso');
-        carregarProjetos();
-        
-    } catch (error) {
-        mostrarAlerta(error.message, 'erro');
+    btnConfirmarModal.addEventListener('click', async () => {
+        if (!projetoIdParaExcluir) return;
+
+        const id = projetoIdParaExcluir;
+        fecharModalExclusao();
+
+        try {
+            const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            const data = await response.json();
+
+            if (!response.ok) throw new Error(data.erro || 'Erro ao deletar o projeto');
+
+            mostrarToast('Projeto excluído com sucesso.', 'sucesso');
+            carregarProjetos();
+            
+        } catch (error) {
+            mostrarToast(error.message, 'erro');
+        }
+    });
+
+    // Fechar ao clicar fora do card
+    modalConfirmacao.addEventListener('click', (e) => {
+        if (e.target === modalConfirmacao) {
+            fecharModalExclusao();
+        }
+    });
+
+    // Fechar ao pressionar a tecla ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modalConfirmacao.classList.contains('oculta')) {
+            fecharModalExclusao();
+        }
+    });
+}
+
+/**
+ * Sistema Moderno de Notificações Toast
+ * @param {string} mensagem - Texto da mensagem
+ * @param {'sucesso'|'erro'|'info'} tipo - Estilo do toast
+ */
+function mostrarToast(mensagem, tipo = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${tipo}`;
+
+    // Ícones SVG para cada tipo
+    let iconeSvg = '';
+    if (tipo === 'sucesso') {
+        iconeSvg = `
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        `;
+    } else if (tipo === 'erro') {
+        iconeSvg = `
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        `;
+    } else {
+        iconeSvg = `
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+        `;
     }
+
+    toast.innerHTML = `
+        <div class="toast-icone">
+            ${iconeSvg}
+        </div>
+        <div class="toast-conteudo">
+            ${escaparHTML(mensagem)}
+        </div>
+        <button class="toast-fechar" aria-label="Fechar">&times;</button>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    // Animação de entrada
+    requestAnimationFrame(() => {
+        toast.classList.add('mostrar');
+    });
+
+    // Função de saída suave
+    const removerToast = () => {
+        toast.classList.remove('mostrar');
+        toast.classList.add('saindo');
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.parentElement.removeChild(toast);
+            }
+        }, 350);
+    };
+
+    // Fechar ao clicar no "X"
+    toast.querySelector('.toast-fechar').addEventListener('click', removerToast);
+
+    // Auto-destruição após 4 segundos
+    setTimeout(removerToast, 4000);
 }
 
-function mostrarAlerta(mensagem, tipo) {
-    alerta.innerHTML = mensagem;
-    alerta.className = `alerta ${tipo}`;
-    alerta.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    setTimeout(() => alerta.className = 'alerta oculta', 4000);
-}
-
+/**
+ * Evita ataques XSS básicos
+ */
 function escaparHTML(texto) {
     if (!texto) return '';
     const span = document.createElement('span');
