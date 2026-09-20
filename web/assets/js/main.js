@@ -22,10 +22,13 @@ const contadorCaracteres = document.getElementById('contador-caracteres');
 const inputBusca = document.getElementById('input-busca');
 const btnLimparBusca = document.getElementById('btn-limpar-busca');
 const infoQtdProjetos = document.getElementById('info-quantidade-projetos');
+const btnExportCsv = document.getElementById('btn-export-csv');
+const btnExportJson = document.getElementById('btn-export-json');
 
 // Variáveis para controle de estado
 let projetoIdParaExcluir = null;
 let todosOsProjetos = [];
+let projetosFiltradosAtuais = [];
 let termoBusca = '';
 let statusFiltro = 'todos';
 
@@ -34,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarTema();
     configurarTextareaDescricao();
     configurarFiltrosEBusca();
+    configurarExportacao();
     verificarStatusApi();
     carregarProjetos();
     configurarEventosModal();
@@ -129,6 +133,7 @@ function aplicarFiltros() {
         return matchStatus && matchBusca;
     });
 
+    projetosFiltradosAtuais = filtrados;
     atualizarContadorHeader(filtrados.length, todosOsProjetos.length);
     renderizarProjetos(filtrados);
 }
@@ -244,6 +249,98 @@ function limparFiltros() {
     });
 
     aplicarFiltros();
+}
+
+/**
+ * Configura os listeners dos botões de exportação (CSV e JSON)
+ */
+function configurarExportacao() {
+    if (btnExportCsv) {
+        btnExportCsv.addEventListener('click', exportarCSV);
+    }
+    if (btnExportJson) {
+        btnExportJson.addEventListener('click', exportarJSON);
+    }
+}
+
+/**
+ * Exporta os projetos para formato CSV compatível com Excel e Google Sheets
+ */
+function exportarCSV() {
+    const lista = projetosFiltradosAtuais;
+    if (!lista || lista.length === 0) {
+        mostrarToast('Nenhum projeto disponível para exportar.', 'info');
+        return;
+    }
+
+    // Cabeçalho das colunas (Padrão Excel PT-BR com ponto e vírgula)
+    const cabecalhos = ['ID', 'Nome do Projeto', 'Descrição', 'Status', 'Data de Criação'];
+
+    const linhas = lista.map(p => {
+        const id = p.id;
+        const nome = `"${(p.nome || '').replace(/"/g, '""')}"`;
+        const descricao = `"${(p.descricao || '').replace(/"/g, '""')}"`;
+        const status = `"${(p.status || '').replace(/"/g, '""')}"`;
+        const dataCriacao = p.createdAt ? new Date(p.createdAt) : new Date();
+        const dataFormatada = `"${dataCriacao.toLocaleDateString('pt-BR')} ${dataCriacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}"`;
+        return [id, nome, descricao, status, dataFormatada].join(';');
+    });
+
+    // UTF-8 BOM (\uFEFF) garante que caracteres acentuados abram perfeitamente no Excel
+    const conteudoCsv = '\uFEFF' + [cabecalhos.join(';'), ...linhas].join('\r\n');
+    
+    baixarArquivo(conteudoCsv, `projetos_${obterDataArquivo()}.csv`, 'text/csv;charset=utf-8;');
+    mostrarToast(`${lista.length} projeto(s) exportado(s) em CSV com sucesso!`, 'sucesso');
+}
+
+/**
+ * Exporta os projetos para formato JSON estruturado
+ */
+function exportarJSON() {
+    const lista = projetosFiltradosAtuais;
+    if (!lista || lista.length === 0) {
+        mostrarToast('Nenhum projeto disponível para exportar.', 'info');
+        return;
+    }
+
+    const dadosExportar = lista.map(p => ({
+        id: p.id,
+        nome: p.nome,
+        descricao: p.descricao || '',
+        status: p.status,
+        createdAt: p.createdAt,
+        dataCriacaoFormatada: p.createdAt ? new Date(p.createdAt).toLocaleDateString('pt-BR') : ''
+    }));
+
+    const conteudoJson = JSON.stringify(dadosExportar, null, 2);
+    baixarArquivo(conteudoJson, `projetos_${obterDataArquivo()}.json`, 'application/json;charset=utf-8;');
+    mostrarToast(`${lista.length} projeto(s) exportado(s) em JSON com sucesso!`, 'sucesso');
+}
+
+/**
+ * Dispara o download de um arquivo no navegador
+ */
+function baixarArquivo(conteudo, nomeArquivo, tipoMime) {
+    const blob = new Blob([conteudo], { type: tipoMime });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nomeArquivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+/**
+ * Retorna a data no formato YYYY-MM-DD para o nome do arquivo
+ */
+function obterDataArquivo() {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
 }
 
 /**

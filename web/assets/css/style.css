@@ -491,6 +491,14 @@ textarea::-webkit-scrollbar-thumb:hover {
     align-items: center;
     margin-bottom: 1.25rem;
     gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.header-titulo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .card-header-com-contador h2 {
@@ -507,6 +515,46 @@ textarea::-webkit-scrollbar-thumb:hover {
     border-radius: 9999px;
     white-space: nowrap;
     transition: background-color 0.3s, color 0.3s;
+}
+
+/* Botões de Exportação (Passo 4) */
+.export-acoes {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-export {
+    background-color: var(--item-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    user-select: none;
+}
+
+.btn-export:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background-color: var(--item-hover-bg);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.btn-export:active {
+    transform: translateY(0);
+}
+
+.btn-export svg {
+    color: currentColor;
+    flex-shrink: 0;
 }
 
 /* Barra de Ferramentas: Busca e Filtros (Passo 3) */
@@ -1096,7 +1144,21 @@ mark.highlight {
     .card-header-com-contador {
         flex-direction: column;
         align-items: flex-start;
+        gap: 0.75rem;
+    }
+    .header-titulo-wrapper {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .export-acoes {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 0.5rem;
+    }
+    .btn-export {
+        justify-content: center;
+        padding: 0.5rem;
     }
     .filtros-status {
         flex-wrap: nowrap;
