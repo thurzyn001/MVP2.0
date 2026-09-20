@@ -15,12 +15,15 @@ const toastContainer = document.getElementById('toast-container');
 const modalConfirmacao = document.getElementById('modal-confirmacao');
 const btnCancelarModal = document.getElementById('btn-cancelar-modal');
 const btnConfirmarModal = document.getElementById('btn-confirmar-modal');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeLabel = document.getElementById('theme-label');
 
 // Variável para armazenar o ID do projeto a ser excluído
 let projetoIdParaExcluir = null;
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
+    inicializarTema();
     verificarStatusApi();
     carregarProjetos();
     configurarEventosModal();
@@ -264,3 +267,43 @@ function escaparHTML(texto) {
     span.textContent = texto;
     return span.innerHTML;
 }
+
+/**
+ * Inicialização e Controle do Tema (Modo Escuro / Claro)
+ */
+function inicializarTema() {
+    const temaSalvo = localStorage.getItem('theme');
+    const prefereEscuro = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    // Aplica o tema salvo ou respeita a preferência do sistema
+    if (temaSalvo === 'dark' || (!temaSalvo && prefereEscuro)) {
+        aplicarTema('dark', false);
+    } else {
+        aplicarTema('light', false);
+    }
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const isEscuro = document.documentElement.getAttribute('data-theme') === 'dark';
+            aplicarTema(isEscuro ? 'light' : 'dark', true);
+        });
+    }
+}
+
+/**
+ * Aplica o tema visual selecionado e persiste no localStorage
+ */
+function aplicarTema(tema, salvar = true) {
+    if (tema === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        if (themeLabel) themeLabel.textContent = 'Modo Escuro';
+        if (themeToggleBtn) themeToggleBtn.setAttribute('aria-checked', 'true');
+        if (salvar) localStorage.setItem('theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        if (themeLabel) themeLabel.textContent = 'Modo Claro';
+        if (themeToggleBtn) themeToggleBtn.setAttribute('aria-checked', 'false');
+        if (salvar) localStorage.setItem('theme', 'light');
+    }
+}
+
