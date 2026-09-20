@@ -37,8 +37,25 @@ O repositório está logicamente dividido em duas áreas:
 │   │   └── img/           # Imagens e ícones (favicon.ico, logo.png)
 │   └── index.html         # View principal da aplicação
 │
-└── README.md              # Documentação
+├── README.md              # Documentação
+└── TODO.md                # Backlog e roadmap técnico
 ```
+
+---
+
+## ✨ Principais Funcionalidades
+
+- **CRUD Completo & Transição Rápida de Status (PATCH):** Cadastro, listagem, exclusão segura com modal de confirmação estilizado e avanço de status interativo nos badges (`Pendente` ➔ `Em Andamento` ➔ `Concluído`).
+- **Mini Dashboard de Métricas:** Cards no topo com contadores em tempo real para Total, Pendentes, Em Andamento e Concluídos com animação de contagem fluida.
+- **Busca em Tempo Real & Filtros de Status:** Pesquisa instantânea com destaque visual dos termos (`<mark>`) combinada a chips de status com contadores ativos e estado vazio inteligente com botão de restauração rápida.
+- **Exportação de Relatórios (CSV & JSON):** Geração de planilhas Excel (com separador `;` e `UTF-8 BOM` para caracteres especiais) e dados estruturados JSON, respeitando os filtros selecionados na tela.
+- **Modo Escuro / Claro (Dark Mode):** Alternador animado na barra superior com persistência em `localStorage` e script anti-flash no carregamento.
+- **Notificações Toast Responsivas:** Notificações flutuantes modernas com animação de entrada/saída e limite dinâmico de exibição adaptado para telas mobile (máx. 2) e desktop (máx. 5).
+
+---
+
+## 📋 Backlog & Roadmap Técnico
+Para detalhes sobre as próximas evoluções planejadas e considerações técnicas de compatibilidade identificadas durante os testes, consulte o arquivo [TODO.md](TODO.md).
 
 ---
 
